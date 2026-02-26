@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# raw source images (use npm run optimize to generate /public/images/arena/)
+/raw-images
