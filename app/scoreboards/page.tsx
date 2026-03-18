@@ -1,7 +1,12 @@
 "use client"
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001/api";
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:3001";
 
 const SPORTS = [
   { id: "cricket", name: "Cricket" },
@@ -12,7 +17,10 @@ const SPORTS = [
   { id: "volleyball", name: "Volleyball" },
   { id: "kabaddi", name: "Kabaddi" },
   { id: "frisbee", name: "Frisbee" },
-];
+] as const;
+
+type SportId = (typeof SPORTS)[number]["id"];
+type MatchData = Record<string, any>;
 
 const MOCK_DATA = {
   cricket: [
@@ -197,25 +205,25 @@ const MOCK_DATA = {
 };
 
 export default function ScoreboardsLayout() {
-  const [selectedSport, setSelectedSport] = useState("cricket");
-  const [matches, setMatches] = useState([]);
+  const [selectedSport, setSelectedSport] = useState<SportId>("cricket");
+  const [matches, setMatches] = useState<MatchData[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchMatches(selectedSport);
 
     let ws: WebSocket | null = null;
-    let connectionAttempted = false;
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+    let isUnmounted = false;
 
     const connectWebSocket = () => {
-      if (connectionAttempted) return;
-      connectionAttempted = true;
+      if (isUnmounted) return;
 
       try {
-        ws = new WebSocket("ws://localhost:3001");
+        ws = new WebSocket(WS_URL);
 
         ws.onopen = () => {
-          console.log("WebSocket connected for real-time updates");
+          console.log(`WebSocket connected for ${selectedSport} updates`);
         };
 
         ws.onmessage = (event) => {
@@ -223,34 +231,36 @@ export default function ScoreboardsLayout() {
             const message = JSON.parse(event.data);
             if (message.event === `${selectedSport}_update`) {
               setMatches(Array.isArray(message.data) ? message.data : []);
+              setLoading(false);
             }
           } catch (error) {
             console.error("Error parsing WebSocket message:", error);
           }
         };
 
-        ws.onerror = (event) => {
-          // Silently handle WebSocket errors - don't log them
-          // The app will still work without real-time updates
-        };
-
-        ws.onclose = (event) => {
-          // Only log if it was an unexpected close
-          if (event.code !== 1000) {
-            console.log("WebSocket connection closed");
+        ws.onerror = () => {
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.close();
           }
         };
-      } catch (error) {
-        // Silently handle WebSocket creation errors
-        // The app will still work with just the REST API
+
+        ws.onclose = () => {
+          if (!isUnmounted) {
+            reconnectTimeout = setTimeout(connectWebSocket, 1500);
+          }
+        };
+      } catch {
+        reconnectTimeout = setTimeout(connectWebSocket, 1500);
       }
     };
 
-    // Attempt WebSocket connection
     connectWebSocket();
 
     return () => {
-      connectionAttempted = true;
+      isUnmounted = true;
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+      }
       if (ws) {
         if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
           ws.close(1000, "Component unmounted");
@@ -260,24 +270,26 @@ export default function ScoreboardsLayout() {
     };
   }, [selectedSport]);
 
-  const fetchMatches = async (sport) => {
+  const fetchMatches = async (sport: SportId) => {
     setLoading(true);
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const response = await fetch(`${API_BASE_URL}/${sport}`, { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${sport} matches`);
+      }
 
-      // Use mock data instead of API call
-      const data = MOCK_DATA[sport] || [];
-      setMatches(Array.isArray(data) ? data : []);
+      const data = await response.json();
+      setMatches(Array.isArray(data) ? (data as MatchData[]) : []);
     } catch (error) {
       console.error("Error fetching matches:", error);
-      setMatches([]);
+      const fallbackData = (MOCK_DATA as Record<SportId, MatchData[]>)[sport] || [];
+      setMatches(Array.isArray(fallbackData) ? fallbackData : []);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSportChange = (sportId) => {
+  const handleSportChange = (sportId: SportId) => {
     setLoading(true);
     setMatches([]);
     setSelectedSport(sportId);
@@ -364,7 +376,7 @@ export default function ScoreboardsLayout() {
   );
 }
 
-function renderMatchCard(sport, match) {
+function renderMatchCard(sport: SportId, match: MatchData) {
   switch (sport) {
     case "cricket":
       return <CricketMatchCard match={match} />;
@@ -387,7 +399,7 @@ function renderMatchCard(sport, match) {
   }
 }
 
-function CricketMatchCard({ match }) {
+function CricketMatchCard({ match }: { match: MatchData }) {
   return (
     <div>
       <div className="flex justify-between items-center mb-6 pb-6 border-b border-[rgb(135,86,36)]">
@@ -437,7 +449,7 @@ function CricketMatchCard({ match }) {
                   {match.details.bowler.name} <span className="text-xs text-[rgb(186,196,92)] ml-1">{match.details.bowler.wickets}/{match.details.bowler.runs}</span> <span className="text-xs text-[rgb(135,86,36)]">({match.details.bowler.overs})</span>
                 </div>
                 <div className="flex gap-1">
-                  {match.details.recentBalls.map((ball, i) => (
+                  {match.details.recentBalls.map((ball: any, i: number) => (
                     <span key={i} className={`w-6 h-6 flex items-center justify-center text-xs font-bold font-gang-of-three ${
                       ball === 'W' ? 'bg-[rgb(181,70,57)] text-[#EAEAEA]' : 
                       ball === '4' || ball === '6' ? 'bg-[rgb(186,196,92)] text-[#0D0D0D]' : 
@@ -460,7 +472,7 @@ function CricketMatchCard({ match }) {
   );
 }
 
-function BasketballMatchCard({ match }) {
+function BasketballMatchCard({ match }: { match: MatchData }) {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -482,7 +494,7 @@ function BasketballMatchCard({ match }) {
         </div>
       </div>
       <div className="grid grid-cols-4 gap-2 text-center text-sm border-t border-[rgb(135,86,36)] pt-4">
-        {match.quarterScoresA.map((score, i) => (
+        {match.quarterScoresA.map((score: any, i: number) => (
           <div key={i} className="flex flex-col">
             <span className="text-[rgb(135,86,36)] text-xs font-bold uppercase">Q{i + 1}</span>
             <span className="text-[#EAEAEA] font-gang-of-three text-lg">{score}</span>
@@ -493,7 +505,7 @@ function BasketballMatchCard({ match }) {
   );
 }
 
-function FootballMatchCard({ match }) {
+function FootballMatchCard({ match }: { match: MatchData }) {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -504,7 +516,7 @@ function FootballMatchCard({ match }) {
           </div>
         </div>
         <div className="text-center">
-          <div className="text-3xl font-bold text-[rgb(186,196,92)] font-gang-of-three">{match.matchTime}'</div>
+          <div className="text-3xl font-bold text-[rgb(186,196,92)] font-gang-of-three">{match.matchTime}&apos;</div>
           <div className="text-sm text-[rgb(135,86,36)] uppercase font-bold tracking-wider mt-1">{match.half === 1 ? "1st Half" : "2nd Half"}</div>
         </div>
         <div className="text-right">
@@ -521,7 +533,7 @@ function FootballMatchCard({ match }) {
   );
 }
 
-function TennisMatchCard({ match }) {
+function TennisMatchCard({ match }: { match: MatchData }) {
   return (
     <div>
       <div className="flex justify-between items-center mb-4 border-b border-[rgb(50,64,21)] pb-3">
@@ -529,12 +541,12 @@ function TennisMatchCard({ match }) {
           <h3 className="text-xl font-bold text-[#EAEAEA] font-gang-of-three tracking-wide uppercase">{match.player1}</h3>
         </div>
         <div className="flex space-x-4">
-          {match.setsPlayer1.map((score, i) => (
+          {match.setsPlayer1.map((score: any, i: number) => (
             <div key={i} className="text-2xl font-bold text-[#EAEAEA] opacity-60 font-gang-of-three">
               {score}
             </div>
           ))}
-          <div className="text-3xl font-bold text-[rgb(186,196,92)] font-gang-of-three min-w-[40px] text-right">
+          <div className="text-3xl font-bold text-[rgb(186,196,92)] font-gang-of-three min-w-10 text-right">
             {match.currentGameScorePlayer1}
           </div>
         </div>
@@ -544,12 +556,12 @@ function TennisMatchCard({ match }) {
           <h3 className="text-xl font-bold text-[#EAEAEA] font-gang-of-three tracking-wide uppercase">{match.player2}</h3>
         </div>
         <div className="flex space-x-4">
-          {match.setsPlayer2.map((score, i) => (
+          {match.setsPlayer2.map((score: any, i: number) => (
             <div key={i} className="text-2xl font-bold text-[#EAEAEA] opacity-60 font-gang-of-three">
               {score}
             </div>
           ))}
-          <div className="text-3xl font-bold text-[#EAEAEA] font-gang-of-three min-w-[40px] text-right">
+          <div className="text-3xl font-bold text-[#EAEAEA] font-gang-of-three min-w-10 text-right">
             {match.currentGameScorePlayer2}
           </div>
         </div>
@@ -558,7 +570,7 @@ function TennisMatchCard({ match }) {
   );
 }
 
-function BadmintonMatchCard({ match }) {
+function BadmintonMatchCard({ match }: { match: MatchData }) {
   return (
     <div>
       <div className="flex justify-between items-center mb-4 border-b border-[rgb(50,64,21)] pb-3">
@@ -566,7 +578,7 @@ function BadmintonMatchCard({ match }) {
           <h3 className="text-xl font-bold text-[#EAEAEA] font-gang-of-three tracking-wide uppercase">{match.player1}</h3>
         </div>
         <div className="flex space-x-4">
-          {match.gamesPlayer1.map((score, i) => (
+          {match.gamesPlayer1.map((score: any, i: number) => (
             <div
               key={i}
               className={`text-2xl font-bold font-gang-of-three ${
@@ -583,7 +595,7 @@ function BadmintonMatchCard({ match }) {
           <h3 className="text-xl font-bold text-[#EAEAEA] font-gang-of-three tracking-wide uppercase">{match.player2}</h3>
         </div>
         <div className="flex space-x-4">
-          {match.gamesPlayer2.map((score, i) => (
+          {match.gamesPlayer2.map((score: any, i: number) => (
             <div
               key={i}
               className={`text-2xl font-bold font-gang-of-three ${
@@ -602,7 +614,7 @@ function BadmintonMatchCard({ match }) {
   );
 }
 
-function VolleyballMatchCard({ match }) {
+function VolleyballMatchCard({ match }: { match: MatchData }) {
   return (
     <div>
       <div className="flex justify-between items-center mb-4 border-b border-[rgb(50,64,21)] pb-3">
@@ -610,7 +622,7 @@ function VolleyballMatchCard({ match }) {
           <h3 className="text-xl font-bold text-[#EAEAEA] font-gang-of-three tracking-wide uppercase">{match.teamA}</h3>
         </div>
         <div className="flex space-x-4 items-center">
-          {match.setsTeamA.map((score, i) => (
+          {match.setsTeamA.map((score: any, i: number) => (
             <div
               key={i}
               className={`text-2xl font-bold font-gang-of-three ${
@@ -630,7 +642,7 @@ function VolleyballMatchCard({ match }) {
           <h3 className="text-xl font-bold text-[#EAEAEA] font-gang-of-three tracking-wide uppercase">{match.teamB}</h3>
         </div>
         <div className="flex space-x-4 items-center">
-          {match.setsTeamB.map((score, i) => (
+          {match.setsTeamB.map((score: any, i: number) => (
             <div
               key={i}
               className={`text-2xl font-bold font-gang-of-three ${
@@ -652,7 +664,7 @@ function VolleyballMatchCard({ match }) {
   );
 }
 
-function KabaddiMatchCard({ match }) {
+function KabaddiMatchCard({ match }: { match: MatchData }) {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -686,7 +698,7 @@ function KabaddiMatchCard({ match }) {
   );
 }
 
-function FrisbeeMatchCard({ match }) {
+function FrisbeeMatchCard({ match }: { match: MatchData }) {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">

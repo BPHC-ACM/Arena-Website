@@ -52,6 +52,7 @@ Every update emits a WebSocket event with the format:
 ```
 
 Events:
+
 - `cricket_update`
 - `basketball_update`
 - `football_update`
@@ -111,6 +112,7 @@ DELETE /api/cricket
 ## Data Models
 
 ### Cricket
+
 ```javascript
 {
   teamA, teamB,
@@ -125,6 +127,7 @@ DELETE /api/cricket
 ```
 
 ### Basketball
+
 ```javascript
 {
   teamA, teamB,
@@ -138,17 +141,23 @@ DELETE /api/cricket
 ```
 
 ### Football
+
 ```javascript
 {
-  teamA, teamB,
-  scoreA, scoreB,
-  matchTime, half,
-  possessionA, possessionB,
-  status
+  (teamA,
+    teamB,
+    scoreA,
+    scoreB,
+    matchTime,
+    half,
+    possessionA,
+    possessionB,
+    status);
 }
 ```
 
 ### Tennis
+
 ```javascript
 {
   player1, player2,
@@ -160,6 +169,7 @@ DELETE /api/cricket
 ```
 
 ### Badminton
+
 ```javascript
 {
   player1, player2,
@@ -171,6 +181,7 @@ DELETE /api/cricket
 ```
 
 ### Volleyball
+
 ```javascript
 {
   teamA, teamB,
@@ -183,61 +194,74 @@ DELETE /api/cricket
 ```
 
 ### Kabaddi
+
 ```javascript
 {
-  teamA, teamB,
-  scoreA, scoreB,
-  playersOnMatA, playersOnMatB,
-  raidTimer, raidingTeam,
-  bonusActive, superRaidActive,
-  half, timeRemaining, status
+  (teamA,
+    teamB,
+    scoreA,
+    scoreB,
+    playersOnMatA,
+    playersOnMatB,
+    raidTimer,
+    raidingTeam,
+    bonusActive,
+    superRaidActive,
+    half,
+    timeRemaining,
+    status);
 }
 ```
 
 ### Frisbee
+
 ```javascript
 {
-  teamA, teamB,
-  scoreA, scoreB,
-  possession,
-  timeRemaining, pointCap,
-  status
+  (teamA, teamB, scoreA, scoreB, possession, timeRemaining, pointCap, status);
 }
 ```
 
 ## Validation Rules
 
 ### Cricket
+
 - wickets: 0-10
 - runs, overs: >= 0
 
 ### Basketball
+
 - scores: >= 0
 - quarter: 1-4
 - shotClock: >= 0
 
 ### Football
+
 - scores: >= 0
 - matchTime: >= 0
 - half: 1-2
 
 ### Tennis
+
 - game scores: >= 0
 - server: 1-2
 
 ### Badminton
+
 - points: >= 0
 - server: 1-2
 
 ### Volleyball
+
 - points, set wins: >= 0
 
 ### Kabaddi
+
 - scores: >= 0
 - playersOnMat: 0-7
 - raidTimer: >= 0
 
 ### Frisbee
+
 - scores: >= 0
 - pointCap: >= 1
 

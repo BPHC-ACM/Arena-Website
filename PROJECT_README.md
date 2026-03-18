@@ -5,6 +5,7 @@ Complete full-stack scoreboard system with 8 sports, REST APIs, and real-time We
 ## Features
 
 **8 Sport-Specific Scoreboards**
+
 - Cricket (T20 Format)
 - Basketball
 - Football (Soccer)
@@ -15,6 +16,7 @@ Complete full-stack scoreboard system with 8 sports, REST APIs, and real-time We
 - Ultimate Frisbee
 
 **Full-Stack Architecture**
+
 - Next.js frontend with Tailwind CSS
 - Express.js backend with REST APIs
 - WebSocket real-time updates
@@ -26,6 +28,7 @@ Complete full-stack scoreboard system with 8 sports, REST APIs, and real-time We
 ### Manual Start
 
 **Backend:**
+
 ```bash
 cd server
 npm install
@@ -33,6 +36,7 @@ npm start
 ```
 
 **Frontend:**
+
 ```bash
 npm install
 npm run dev
@@ -95,6 +99,7 @@ Real-time updates are emitted as:
 ```
 
 **Events:**
+
 - `cricket_update`
 - `basketball_update`
 - `football_update`
@@ -138,42 +143,50 @@ curl http://localhost:3001/api/cricket
 ## Sport-Specific Data Models
 
 ### Cricket
+
 - Runs/Wickets, Overs, Run Rate
 - Target & Required RR (for chasing team)
 - Current Batsmen, Current Bowler
 - Innings tracking
 
 ### Basketball
+
 - Quarter-wise scores (Q1-Q4)
 - Game Clock, Shot Clock
 - Total scores
 
 ### Football
+
 - Match time, Half indicator
 - Possession percentage
 - Live status
 
 ### Tennis
+
 - Set scores
 - Current game score (0, 15, 30, 40)
 - Server indicator
 
 ### Badminton
+
 - Best of 3 games
 - Current points
 - Serving player
 
 ### Volleyball
+
 - Best of 5 sets
 - Set-wise scores
 - Current set points
 
 ### Kabaddi
+
 - Raid timer (30 seconds)
 - Players on mat count
 - Bonus/Super raid indicators
 
 ### Ultimate Frisbee
+
 - Point cap (race to 21)
 - Time remaining
 - Possession indicator
@@ -201,12 +214,14 @@ curl http://localhost:3001/api/cricket
 ## Tech Stack
 
 **Frontend:**
+
 - Next.js 16
 - React 19
 - Tailwind CSS 4
 - TypeScript
 
 **Backend:**
+
 - Node.js
 - Express.js
 - WebSocket (ws)
