@@ -412,7 +412,7 @@ export default function Home() {
   
   const frameCount = 141; 
 
-  // ---> TRUE RANDOMIZED MAZE ALGORITHM <---
+  // ---> TRUE RANDOMIZED MAZE ALGORITHM (NO BLINKING) <---
   useEffect(() => {
     if (!isLoading) return;
     const canvas = mazeCanvasRef.current;
@@ -489,7 +489,6 @@ export default function Home() {
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
 
-    // Function to trace all existing walls
     const traceWalls = () => {
         ctx.beginPath();
         for (let i = 0; i < cols; i++) {
@@ -513,7 +512,6 @@ export default function Home() {
 
     // Step 1: Draw the thick glowing base
     ctx.lineWidth = 6;
-    // ---> COLOR CHANGE HAPPENED HERE <---
     ctx.strokeStyle = "#064e3b"; // Dark Emerald Green
     ctx.shadowBlur = 15;
     ctx.shadowColor = "#064e3b"; // Dark Emerald Green Glow
@@ -525,22 +523,63 @@ export default function Home() {
     ctx.shadowBlur = 0; // Turn off glow for the inner black line
     traceWalls();
 
-    // Step 3: Randomly place power pellets in the corridors
-    ctx.fillStyle = "rgba(255,255,255,0.7)";
+    // ---> NEW: MULTI-COLORED NEON PELLET LOGIC <---
+    const pellets = [];
     for (let i = 0; i < cols; i++) {
         for (let j = 0; j < rows; j++) {
-            if (Math.random() < 0.25) { // 25% chance per cell
-                ctx.beginPath();
-                ctx.arc(xOffset + i * cellSize + cellSize / 2, yOffset + j * cellSize + cellSize / 2, 3, 0, Math.PI * 2);
-                ctx.fill();
+            if (Math.random() < 0.25) { 
+                pellets.push({
+                    x: xOffset + i * cellSize + cellSize / 2,
+                    y: yOffset + j * cellSize + cellSize / 2
+                });
             }
         }
+    }
+
+    // Shuffle the array of pellets randomly
+    for (let i = pellets.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pellets[i], pellets[j]] = [pellets[j], pellets[i]];
+    }
+
+    // Pick 8 to 15 dots to be the special glowing ones
+    const glowingDotCount = Math.floor(Math.random() * 8) + 8; 
+    
+    // A palette of bright, classic arcade neon colors
+    const neonColors = [
+        "#ff0000", // Red
+        "#00ffff", // Cyan
+        "#ff00ff", // Magenta
+        "#ffff00", // Yellow
+        "#39ff14", // Neon Green
+        "#ff8800", // Orange
+        "#bc13fe"  // Purple
+    ];
+
+    // Draw all the pellets
+    for (let i = 0; i < pellets.length; i++) {
+        ctx.beginPath();
+        const radius = i < glowingDotCount ? 4 : 3; 
+        ctx.arc(pellets[i].x, pellets[i].y, radius, 0, Math.PI * 2);
+
+        if (i < glowingDotCount) {
+            // Pick a random bright color from our palette for this specific dot
+            const randomColor = neonColors[Math.floor(Math.random() * neonColors.length)];
+            
+            ctx.fillStyle = randomColor;
+            ctx.shadowBlur = 25; 
+            ctx.shadowColor = randomColor;
+        } else {
+            // STANDARD DOTS 
+            ctx.fillStyle = "rgba(255,255,255,0.3)"; 
+            ctx.shadowBlur = 0;
+        }
+        ctx.fill();
     }
 
     const handleResize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      // We don't re-draw on resize here so the random maze doesn't flicker wildly while resizing
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -672,7 +711,7 @@ export default function Home() {
               <img 
                 src={isMouthOpen ? "/loader_open.png" : "/loader_close.png"}
                 className="absolute h-10 md:h-20 w-auto top-1/2 -translate-y-1/2 transition-all duration-[100ms] ease-linear drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]"
-                style={{ left: `${Math.min(displayPercentage * 0.65, 65)}%` }} 
+                style={{ left: `${Math.min(displayPercentage * 0.60, 60)}%` }} 
                 alt="Loading Turtles"
               />
             </div>
