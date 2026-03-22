@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Footer from "../components/Footer";
+import TurtleBg from "../components/TurtleBg";
 
 const TICKER_WORDS = Array(40).fill("ABOUT");
 
@@ -479,7 +481,7 @@ export default function Home() {
               fontSize: "clamp(10px, 1.1vw, 15px)",
             }}
           >
-            ARENA'26 STEPS OUT OF THE SHADOWS AND INTO THE BATTLEFIELD. THIS YEAR'S THEME IS SHADOWS RISING. 
+            ARENA&apos;26 STEPS OUT OF THE SHADOWS AND INTO THE BATTLEFIELD. THIS YEAR&apos;S THEME IS SHADOWS RISING. 
             ROOTED IN THE FIERCE SPIRIT OF NINJA WARRIORS, IT BRINGS ALIVE A WORLD OF STEALTH, STRENGTH, 
             AND UNBREAKABLE DISCIPLINE WHERE WARRIORS TRAIN IN SILENCE, STRIKE WITH PRECISION, AND RISE 
             WITH UNSTOPPABLE POWER. BATHED IN BOLD GREENS AND FORGED IN THE AURA OF COMBAT, ARENA CHANNELS 
@@ -526,6 +528,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <TurtleBg />
+      <Footer />
     </>
   );
 }
