@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Footer from "../components/Footer";
+import { SportsSection } from "../components/SportsSection";
 import TurtleBg from "../components/TurtleBg";
 
 const TICKER_WORDS = Array(40).fill("ABOUT");
@@ -529,6 +530,9 @@ export default function Home() {
         </div>
       </section>
 
+      <div className="relative z-40 -mt-[20vh] max-[900px]:-mt-[14vh] max-[600px]:-mt-[10vh]">
+        <SportsSection />
+      </div>
       <TurtleBg />
       <Footer />
     </>

@@ -9,6 +9,27 @@ const contactItems = [
   { icon: "location", text: "BITS PILANI, HYDERABAD CAMPUS" },
 ];
 
+function ContactText({ text }: { text: string }) {
+  return (
+    <>
+      {Array.from(text).map((char, idx) => {
+        if (char === "+" || char === "@" || char === ".") {
+          return (
+            <span
+              key={`${char}-${idx}`}
+              style={{ fontFamily: "'Segoe UI Symbol', 'Noto Sans', sans-serif" }}
+            >
+              {char}
+            </span>
+          );
+        }
+
+        return <React.Fragment key={`${char}-${idx}`}>{char}</React.Fragment>;
+      })}
+    </>
+  );
+}
+
 function ContactIcon({ type }: { type: string }) {
   if (type === "phone") {
     return (
@@ -113,7 +134,7 @@ export default function Footer() {
                 className="text-[#8c9c81]"
                 style={{ ...customFont, fontSize: "clamp(20px, 2.2vw, 28px)", letterSpacing: "0.04em", lineHeight: 1.15 }}
               >
-                {item.text}
+                <ContactText text={item.text} />
               </span>
             </div>
           ))}
