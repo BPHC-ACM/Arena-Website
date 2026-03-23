@@ -8,12 +8,12 @@ const sportsAccentRed = '#d11916'
 
 const BannerLine = ({ reverse = false }: { reverse?: boolean }) => (
   <p
-    className={`m-0 flex w-max items-center whitespace-nowrap px-0 py-[0.12rem] text-[clamp(0.82rem,1.2vw,1.05rem)] leading-none font-normal uppercase tracking-[0.03em] [text-rendering:geometricPrecision] max-[600px]:pb-[0.08rem] max-[600px]:text-[clamp(0.72rem,2.4vw,0.92rem)] ${
-      reverse
-        ? 'animate-[sports-marquee-reverse_60s_linear_infinite]'
-        : 'animate-[sports-marquee_60s_linear_infinite]'
-    }`}
-    style={{ color: sportsAccentRed, fontFamily: "'gangofthree', Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif" }}
+    className="m-0 flex w-max items-center whitespace-nowrap px-0 py-[0.12rem] text-[clamp(0.82rem,1.2vw,1.05rem)] leading-none font-normal uppercase tracking-[0.03em] [text-rendering:geometricPrecision] max-[600px]:pb-[0.08rem] max-[600px]:text-[clamp(0.72rem,2.4vw,0.92rem)]"
+    style={{
+      color: sportsAccentRed,
+      fontFamily: "'gangofthree', Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif",
+      animation: reverse ? 'sports-marquee-reverse 60s linear infinite' : 'sports-marquee 60s linear infinite',
+    }}
   >
     {Array.from({ length: bannerRepeats }).map((_, repeatIdx) => (
       <span key={`banner-repeat-${repeatIdx}`} className="inline-flex items-center">
@@ -82,7 +82,7 @@ export const SportsSection = () => {
       <div className="relative box-border flex h-[696px] items-center overflow-hidden bg-[linear-gradient(180deg,#050505_0%,#000_50%,#050505_100%)] pt-[var(--sports-track-pad-top)] pb-[var(--sports-track-pad-bottom)] max-[900px]:h-[560px] max-[600px]:h-[424px]">
 
         <div className="pointer-events-none absolute top-1/2 left-0 w-full -translate-y-1/2">
-          <div className="flex w-max animate-[sports-vector-marquee_45s_linear_infinite]">
+          <div className="flex w-max" style={{ animation: 'sports-vector-marquee 45s linear infinite' }}>
             <img
               className="h-[calc(382.5px*var(--sports-layout-scale))] w-[170vw] shrink-0 select-none object-cover object-center filter-[brightness(1.04)]"
               src={marqueeVector}
