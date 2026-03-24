@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import Footer from "../components/Footer";
 import { SportsSection } from "../components/SportsSection";
 import TurtleBg from "../components/TurtleBg";
@@ -343,21 +344,28 @@ export default function Home() {
             />
           </div>
 
-          {/* LAYER 3: Nav Button */}
-          <button
-            style={{
-              opacity: heroOpacity,
-              pointerEvents: heroOpacity > 0 ? "auto" : "none",
-            }}
-            className="fixed top-10 left-10 z-[100] transition-transform duration-300 hover:scale-110 active:scale-95"
-            onClick={() => console.log("Menu Open")}
+          {/* LAYER 2.5: Scroll Indicator */}
+          <div 
+            style={{ opacity: heroOpacity }}
+            className="absolute bottom-8 md:bottom-12 left-0 right-0 z-20 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-200"
           >
-            <img
-              src="/3bar.png"
-              className="w-14 h-auto drop-shadow-[0_0_15px_rgba(163,230,53,0.4)]"
-              alt="Navigation Menu"
-            />
-          </button>
+            <span 
+              className="text-[#7E9678] text-xs md:text-sm tracking-widest uppercase mb-3 drop-shadow-md"
+              style={{ fontFamily: "'GangOfThree', sans-serif" }}
+            >
+              Scroll to explore
+            </span>
+            <motion.svg
+              animate={{ y: [0, 10, 0] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+              className="w-5 h-5 md:w-6 md:h-6 text-[#7E9678] drop-shadow-md"
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </motion.svg>
+          </div>
 
           {/* LAYER 4: BLACK SKEWED PANEL TRANSITION */}
           {transitionProgress > 0 && (
