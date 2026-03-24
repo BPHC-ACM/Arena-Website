@@ -1,7 +1,12 @@
 import React from 'react';
 import Image from 'next/image';
 
-const quickLinks = ["SCORE", "GALLERY", "TEAM", "SPONSORS"];
+const quickLinks = [
+  { label: "SCORE", href: "/scoreboards" },
+  { label: "GALLERY", href: "#" },
+  { label: "TEAM", href: "#" },
+  { label: "SPONSORS", href: "#" },
+];
 
 const contactItems = [
   { icon: "phone", text: "+91 90000 00001" },
@@ -79,12 +84,12 @@ export default function Footer() {
             <nav className="flex flex-col gap-2">
               {quickLinks.map((item) => (
                 <a
-                  key={item}
-                  href="#"
+                  key={item.label}
+                  href={item.href}
                   className="text-[#8c9c81] transition-colors hover:text-[#bacb48]"
                   style={{ ...customFont, fontSize: "clamp(24px, 2.5vw, 34px)", letterSpacing: "0.06em", lineHeight: 1.1 }}
                 >
-                  {item}
+                  {item.label}
                 </a>
               ))}
             </nav>
