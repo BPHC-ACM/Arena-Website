@@ -85,7 +85,10 @@ export default function ArenaGallery() {
           className="absolute bottom-8 left-0 right-0 mx-auto flex flex-col items-center justify-center z-30 pointer-events-none"
           style={{ opacity: indicatorOpacity }}
         >
-          <span className="text-white/70 text-xs md:text-sm font-semibold tracking-[0.2em] uppercase mb-3 drop-shadow-md">
+          <span 
+            className="text-[#7E9678] text-xs md:text-sm tracking-widest uppercase mb-3 drop-shadow-md"
+            style={{ fontFamily: "'GangOfThree', sans-serif" }}
+          >
             Scroll to explore
           </span>
           <motion.svg
@@ -152,7 +155,10 @@ function GalleryCaption({ title, index, total, progress }: { title: string, inde
       className="absolute top-0 left-0 w-full h-full flex items-center justify-center"
       style={{ y, opacity }}
     >
-      <span className="text-white text-lg md:text-2xl font-bold uppercase tracking-[0.15em] drop-shadow-lg">
+      <span 
+        className="text-[#EE271F] text-5xl md:text-7xl uppercase tracking-widest drop-shadow-[0_0_15px_rgba(238,39,31,0.6)]"
+        style={{ fontFamily: "'Tillburg', 'Impact', sans-serif" }}
+      >
         {title}
       </span>
     </motion.div>
