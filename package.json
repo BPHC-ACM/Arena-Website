@@ -7,10 +7,13 @@
     "dev:full": "node scripts/dev-full.js",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "optimize": "node scripts/optimize.js"
   },
   "dependencies": {
     "dotenv": "^17.3.1",
+    "framer-motion": "^12.34.3",
+    "lenis": "^1.3.17",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
@@ -23,6 +26,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
