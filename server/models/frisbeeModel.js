@@ -1,5 +1,8 @@
-let frisbeeMatches = [];
-let matchIdCounter = 1;
+const { getInitialMatches, getNextCounter } = require("./seedMatches");
+const { getInitialSportMatches, saveSportMatches } = require("./matchStore");
+
+let frisbeeMatches = getInitialSportMatches("frisbee", getInitialMatches("frisbee"));
+let matchIdCounter = getNextCounter(frisbeeMatches);
 
 const getFrisbeeMatches = () => frisbeeMatches;
 
@@ -20,6 +23,7 @@ const createFrisbeeMatch = (data) => {
     status: data.status || "",
   };
   frisbeeMatches.push(newMatch);
+  saveSportMatches("frisbee", frisbeeMatches);
   return newMatch;
 };
 
@@ -27,6 +31,7 @@ const updateFrisbeeMatch = (id, data) => {
   const index = frisbeeMatches.findIndex((match) => match.id === parseInt(id));
   if (index !== -1) {
     frisbeeMatches[index] = { ...frisbeeMatches[index], ...data };
+    saveSportMatches("frisbee", frisbeeMatches);
     return frisbeeMatches[index];
   }
   return null;
@@ -35,7 +40,9 @@ const updateFrisbeeMatch = (id, data) => {
 const deleteFrisbeeMatch = (id) => {
   const index = frisbeeMatches.findIndex((match) => match.id === parseInt(id));
   if (index !== -1) {
-    return frisbeeMatches.splice(index, 1)[0];
+    const removedMatch = frisbeeMatches.splice(index, 1)[0];
+    saveSportMatches("frisbee", frisbeeMatches);
+    return removedMatch;
   }
   return null;
 };

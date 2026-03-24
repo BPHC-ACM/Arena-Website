@@ -1,5 +1,8 @@
-let kabaddiMatches = [];
-let matchIdCounter = 1;
+const { getInitialMatches, getNextCounter } = require("./seedMatches");
+const { getInitialSportMatches, saveSportMatches } = require("./matchStore");
+
+let kabaddiMatches = getInitialSportMatches("kabaddi", getInitialMatches("kabaddi"));
+let matchIdCounter = getNextCounter(kabaddiMatches);
 
 const getKabaddiMatches = () => kabaddiMatches;
 
@@ -25,6 +28,7 @@ const createKabaddiMatch = (data) => {
     status: data.status || "",
   };
   kabaddiMatches.push(newMatch);
+  saveSportMatches("kabaddi", kabaddiMatches);
   return newMatch;
 };
 
@@ -32,6 +36,7 @@ const updateKabaddiMatch = (id, data) => {
   const index = kabaddiMatches.findIndex((match) => match.id === parseInt(id));
   if (index !== -1) {
     kabaddiMatches[index] = { ...kabaddiMatches[index], ...data };
+    saveSportMatches("kabaddi", kabaddiMatches);
     return kabaddiMatches[index];
   }
   return null;
@@ -40,7 +45,9 @@ const updateKabaddiMatch = (id, data) => {
 const deleteKabaddiMatch = (id) => {
   const index = kabaddiMatches.findIndex((match) => match.id === parseInt(id));
   if (index !== -1) {
-    return kabaddiMatches.splice(index, 1)[0];
+    const removedMatch = kabaddiMatches.splice(index, 1)[0];
+    saveSportMatches("kabaddi", kabaddiMatches);
+    return removedMatch;
   }
   return null;
 };

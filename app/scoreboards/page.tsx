@@ -4,9 +4,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { API_BASE_URL, getWebSocketUrl } from "../lib/websocket";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001/api";
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:3001";
+const WS_URL = getWebSocketUrl();
 
 const SPORTS = [
   { id: "cricket", name: "Cricket" },
@@ -21,193 +21,203 @@ const SPORTS = [
 
 type SportId = (typeof SPORTS)[number]["id"];
 type MatchData = Record<string, any>;
+type ScorerRole = "admin" | "scorer";
 
-const MOCK_DATA = {
-  cricket: [
-    {
-      id: 1,
-      teamA: "Mumbai Indians",
-      teamB: "Chennai Super Kings",
-      scoreA: { runs: 184, wickets: 6, overs: "20.0" },
-      scoreB: { runs: 142, wickets: 8, overs: "18.4" },
-      status: "Mumbai Indians won by 42 runs",
-      details: {
-        summary: "MOTM: Rohit Sharma - 68(42)"
-      }
-    },
-    {
-      id: 2,
-      teamA: "Royal Challengers",
-      teamB: "Delhi Capitals",
-      scoreA: { runs: 156, wickets: 4, overs: "16.2" },
-      scoreB: { runs: 125, wickets: 9, overs: "20.0" },
-      status: "Match in progress",
-      details: {
-        striker: { name: "V. Kohli", runs: 72, balls: 45 },
-        nonStriker: { name: "G. Maxwell", runs: 14, balls: 8 },
-        bowler: { name: "A. Nortje", overs: "3.2", runs: 28, wickets: 1 },
-        crr: "9.55",
-        rrr: "11.2",
-        recentBalls: ["1", "4", "0", "1", "2", "6"]
-      }
-    }
-  ],
-  basketball: [
-    {
-      id: 1,
-      teamA: "Lakers",
-      teamB: "Warriors",
-      scoreA: 108,
-      scoreB: 112,
-      currentQuarter: 4,
-      gameClock: "2:34",
-      quarterScoresA: [28, 24, 30, 26]
-    },
-    {
-      id: 2,
-      teamA: "Bulls",
-      teamB: "Celtics",
-      scoreA: 89,
-      scoreB: 95,
-      currentQuarter: 3,
-      gameClock: "8:15",
-      quarterScoresA: [22, 31, 36, 0]
-    }
-  ],
-  football: [
-    {
-      id: 1,
-      teamA: "Manchester United",
-      teamB: "Liverpool",
-      scoreA: 2,
-      scoreB: 1,
-      matchTime: 78,
-      half: 2,
-      status: "Match in progress"
-    },
-    {
-      id: 2,
-      teamA: "Barcelona",
-      teamB: "Real Madrid",
-      scoreA: 1,
-      scoreB: 3,
-      matchTime: 90,
-      half: 2,
-      status: "Full Time"
-    }
-  ],
-  tennis: [
-    {
-      id: 1,
-      player1: "Novak Djokovic",
-      player2: "Rafael Nadal",
-      setsPlayer1: [6, 4, 6],
-      setsPlayer2: [3, 6, 2],
-      currentGameScorePlayer1: 30,
-      currentGameScorePlayer2: 15
-    },
-    {
-      id: 2,
-      player1: "Roger Federer",
-      player2: "Andy Murray",
-      setsPlayer1: [7, 6],
-      setsPlayer2: [5, 4],
-      currentGameScorePlayer1: 40,
-      currentGameScorePlayer2: 30
-    }
-  ],
-  badminton: [
-    {
-      id: 1,
-      player1: "Lin Dan",
-      player2: "Lee Chong Wei",
-      gamesPlayer1: [21, 18, 21],
-      gamesPlayer2: [19, 21, 16],
-      currentGame: 3
-    },
-    {
-      id: 2,
-      player1: "P.V. Sindhu",
-      player2: "Carolina Marin",
-      gamesPlayer1: [21, 15],
-      gamesPlayer2: [17, 21],
-      currentGame: 2
-    }
-  ],
-  volleyball: [
-    {
-      id: 1,
-      teamA: "Brazil",
-      teamB: "USA",
-      setsTeamA: [25, 21, 24, 18],
-      setsTeamB: [23, 25, 26, 25],
-      currentSet: 4,
-      setWinsA: 1,
-      setWinsB: 3
-    },
-    {
-      id: 2,
-      teamA: "Italy",
-      teamB: "Poland",
-      setsTeamA: [25, 22, 25],
-      setsTeamB: [20, 25, 19],
-      currentSet: 3,
-      setWinsA: 2,
-      setWinsB: 1
-    }
-  ],
-  kabaddi: [
-    {
-      id: 1,
-      teamA: "Patna Pirates",
-      teamB: "Bengal Warriors",
-      scoreA: 32,
-      scoreB: 28,
-      playersOnMatA: 6,
-      playersOnMatB: 5,
-      raidTimer: 15,
-      status: "2nd Half - 8:30 remaining"
-    },
-    {
-      id: 2,
-      teamA: "U Mumba",
-      teamB: "Jaipur Pink Panthers",
-      scoreA: 24,
-      scoreB: 31,
-      playersOnMatA: 7,
-      playersOnMatB: 6,
-      raidTimer: 8,
-      status: "1st Half - 12:45 remaining"
-    }
-  ],
-  frisbee: [
-    {
-      id: 1,
-      teamA: "Wind Chill",
-      teamB: "Machine",
-      scoreA: 12,
-      scoreB: 9,
-      timeRemaining: "15:30",
-      pointCap: 15,
-      possession: "Wind Chill"
-    },
-    {
-      id: 2,
-      teamA: "Revolution",
-      teamB: "Empire",
-      scoreA: 8,
-      scoreB: 11,
-      timeRemaining: "22:15",
-      pointCap: 15,
-      possession: "Empire"
-    }
-  ]
+type FieldPath = string[];
+
+const getMatchLabel = (sport: SportId, match: MatchData) => {
+  if (sport === "tennis" || sport === "badminton") {
+    return `${match.player1 || "Player 1"} vs ${match.player2 || "Player 2"}`;
+  }
+  return `${match.teamA || "Team A"} vs ${match.teamB || "Team B"}`;
+};
+
+const getUpdateTemplate = (sport: SportId, match: MatchData) => {
+  switch (sport) {
+    case "cricket":
+      return {
+        scoreA: match.scoreA,
+        scoreB: match.scoreB,
+        status: match.status,
+      };
+    case "basketball":
+      return {
+        scoreA: match.scoreA,
+        scoreB: match.scoreB,
+        currentQuarter: match.currentQuarter,
+        gameClock: match.gameClock,
+        status: match.status,
+      };
+    case "football":
+      return {
+        scoreA: match.scoreA,
+        scoreB: match.scoreB,
+        matchTime: match.matchTime,
+        half: match.half,
+        status: match.status,
+      };
+    case "tennis":
+      return {
+        setsPlayer1: match.setsPlayer1,
+        setsPlayer2: match.setsPlayer2,
+        currentGameScorePlayer1: match.currentGameScorePlayer1,
+        currentGameScorePlayer2: match.currentGameScorePlayer2,
+        status: match.status,
+      };
+    case "badminton":
+      return {
+        gamesPlayer1: match.gamesPlayer1,
+        gamesPlayer2: match.gamesPlayer2,
+        currentPointsPlayer1: match.currentPointsPlayer1,
+        currentPointsPlayer2: match.currentPointsPlayer2,
+        currentGame: match.currentGame,
+        status: match.status,
+      };
+    case "volleyball":
+      return {
+        setsTeamA: match.setsTeamA,
+        setsTeamB: match.setsTeamB,
+        currentPointsTeamA: match.currentPointsTeamA,
+        currentPointsTeamB: match.currentPointsTeamB,
+        setWinsA: match.setWinsA,
+        setWinsB: match.setWinsB,
+        status: match.status,
+      };
+    case "kabaddi":
+      return {
+        scoreA: match.scoreA,
+        scoreB: match.scoreB,
+        playersOnMatA: match.playersOnMatA,
+        playersOnMatB: match.playersOnMatB,
+        raidTimer: match.raidTimer,
+        status: match.status,
+      };
+    case "frisbee":
+      return {
+        scoreA: match.scoreA,
+        scoreB: match.scoreB,
+        timeRemaining: match.timeRemaining,
+        possession: match.possession,
+        pointCap: match.pointCap,
+        status: match.status,
+      };
+    default:
+      return {};
+  }
+};
+
+const getCreateTemplate = (sport: SportId) => {
+  switch (sport) {
+    case "cricket":
+      return {
+        teamA: "",
+        teamB: "",
+        scoreA: { runs: 0, wickets: 0, overs: "0.0" },
+        scoreB: { runs: 0, wickets: 0, overs: "0.0" },
+        status: "Match started",
+      };
+    case "basketball":
+      return {
+        teamA: "",
+        teamB: "",
+        scoreA: 0,
+        scoreB: 0,
+        currentQuarter: 1,
+        gameClock: "12:00",
+        quarterScoresA: [0, 0, 0, 0],
+        quarterScoresB: [0, 0, 0, 0],
+        status: "Tip-off",
+      };
+    case "football":
+      return {
+        teamA: "",
+        teamB: "",
+        scoreA: 0,
+        scoreB: 0,
+        matchTime: 0,
+        half: 1,
+        status: "Kick-off",
+      };
+    case "tennis":
+      return {
+        player1: "",
+        player2: "",
+        setsPlayer1: [],
+        setsPlayer2: [],
+        currentSet: 1,
+        currentGameScorePlayer1: 0,
+        currentGameScorePlayer2: 0,
+        status: "Match started",
+      };
+    case "badminton":
+      return {
+        player1: "",
+        player2: "",
+        gamesPlayer1: [],
+        gamesPlayer2: [],
+        currentGame: 1,
+        currentPointsPlayer1: 0,
+        currentPointsPlayer2: 0,
+        status: "Game 1",
+      };
+    case "volleyball":
+      return {
+        teamA: "",
+        teamB: "",
+        setsTeamA: [],
+        setsTeamB: [],
+        currentSet: 1,
+        currentPointsTeamA: 0,
+        currentPointsTeamB: 0,
+        setWinsA: 0,
+        setWinsB: 0,
+        status: "Set 1",
+      };
+    case "kabaddi":
+      return {
+        teamA: "",
+        teamB: "",
+        scoreA: 0,
+        scoreB: 0,
+        playersOnMatA: 7,
+        playersOnMatB: 7,
+        raidTimer: 30,
+        status: "Raid started",
+      };
+    case "frisbee":
+      return {
+        teamA: "",
+        teamB: "",
+        scoreA: 0,
+        scoreB: 0,
+        timeRemaining: "48:00",
+        possession: "",
+        pointCap: 21,
+        status: "Pull",
+      };
+    default:
+      return {};
+  }
 };
 
 export default function ScoreboardsLayout() {
   const [selectedSport, setSelectedSport] = useState<SportId>("cricket");
   const [matches, setMatches] = useState<MatchData[]>([]);
   const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [wsConnected, setWsConnected] = useState(false);
+  const [scorerRole, setScorerRole] = useState<ScorerRole>("scorer");
+  const [scoreToken, setScoreToken] = useState("");
+  const [selectedMatchId, setSelectedMatchId] = useState<number | null>(null);
+  const [formData, setFormData] = useState<MatchData>({});
+  const [createFormData, setCreateFormData] = useState<MatchData>(getCreateTemplate("cricket"));
+  const [updateStatus, setUpdateStatus] = useState<string | null>(null);
+  const [createStatus, setCreateStatus] = useState<string | null>(null);
+  const [scorerExpanded, setScorerExpanded] = useState(false);
+  const [panelMode, setPanelMode] = useState<"update" | "create">("update");
+
+  const editableMatches = matches.filter((match) => typeof match.id === "number");
+  const selectedMatch = editableMatches.find((match) => match.id === selectedMatchId) || null;
 
   useEffect(() => {
     fetchMatches(selectedSport);
@@ -223,7 +233,7 @@ export default function ScoreboardsLayout() {
         ws = new WebSocket(WS_URL);
 
         ws.onopen = () => {
-          console.log(`WebSocket connected for ${selectedSport} updates`);
+          setWsConnected(true);
         };
 
         ws.onmessage = (event) => {
@@ -232,6 +242,7 @@ export default function ScoreboardsLayout() {
             if (message.event === `${selectedSport}_update`) {
               setMatches(Array.isArray(message.data) ? message.data : []);
               setLoading(false);
+              setApiError(null);
             }
           } catch (error) {
             console.error("Error parsing WebSocket message:", error);
@@ -239,17 +250,20 @@ export default function ScoreboardsLayout() {
         };
 
         ws.onerror = () => {
+          setWsConnected(false);
           if (ws && ws.readyState === WebSocket.OPEN) {
             ws.close();
           }
         };
 
         ws.onclose = () => {
+          setWsConnected(false);
           if (!isUnmounted) {
             reconnectTimeout = setTimeout(connectWebSocket, 1500);
           }
         };
       } catch {
+        setWsConnected(false);
         reconnectTimeout = setTimeout(connectWebSocket, 1500);
       }
     };
@@ -272,6 +286,8 @@ export default function ScoreboardsLayout() {
 
   const fetchMatches = async (sport: SportId) => {
     setLoading(true);
+    setApiError(null);
+
     try {
       const response = await fetch(`${API_BASE_URL}/${sport}`, { cache: "no-store" });
       if (!response.ok) {
@@ -282,8 +298,8 @@ export default function ScoreboardsLayout() {
       setMatches(Array.isArray(data) ? (data as MatchData[]) : []);
     } catch (error) {
       console.error("Error fetching matches:", error);
-      const fallbackData = (MOCK_DATA as Record<SportId, MatchData[]>)[sport] || [];
-      setMatches(Array.isArray(fallbackData) ? fallbackData : []);
+      setMatches([]);
+      setApiError(`Could not connect to ${API_BASE_URL}/${sport}. Start the backend server on port 3001.`);
     } finally {
       setLoading(false);
     }
@@ -292,7 +308,118 @@ export default function ScoreboardsLayout() {
   const handleSportChange = (sportId: SportId) => {
     setLoading(true);
     setMatches([]);
+    setSelectedMatchId(null);
+    setFormData({});
+    setCreateFormData(getCreateTemplate(sportId));
+    setUpdateStatus(null);
+    setCreateStatus(null);
     setSelectedSport(sportId);
+  };
+
+  useEffect(() => {
+    const nextEditableMatches = matches.filter((match) => typeof match.id === "number");
+
+    if (!nextEditableMatches.length) {
+      setSelectedMatchId(null);
+      setFormData({});
+      return;
+    }
+
+    const nextMatch = nextEditableMatches[0];
+    const template = getUpdateTemplate(selectedSport, nextMatch);
+    setSelectedMatchId(nextMatch.id);
+    setFormData(template);
+  }, [selectedSport, matches]);
+
+  const handleMatchSelect = (matchId: number) => {
+    setSelectedMatchId(matchId);
+    const nextMatch = editableMatches.find((match) => match.id === matchId);
+    if (nextMatch) {
+      setFormData(getUpdateTemplate(selectedSport, nextMatch));
+    }
+  };
+
+  const handleFormDataChange = (nextData: MatchData) => {
+    setFormData(nextData);
+  };
+
+  const handleCreateFormDataChange = (nextData: MatchData) => {
+    setCreateFormData(nextData);
+  };
+
+  const handleScoreUpdate = async () => {
+    if (!selectedMatchId) {
+      setUpdateStatus("Select a match before sending an update.");
+      return;
+    }
+
+    if (!scoreToken.trim()) {
+      setUpdateStatus("Token required. Enter scorer/admin token.");
+      return;
+    }
+
+    setUpdateStatus("Updating match...");
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/${selectedSport}/${selectedMatchId}/update`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${scoreToken.trim()}`,
+          "X-User-Role": scorerRole,
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const body = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(body?.error || "Failed to update score");
+      }
+
+      const updatedMatch = body as MatchData;
+      setMatches((prevMatches) =>
+        prevMatches.map((match) => (match.id === updatedMatch.id ? updatedMatch : match))
+      );
+      setUpdateStatus("Score updated successfully.");
+    } catch (error) {
+      setUpdateStatus(error instanceof Error ? error.message : "Score update failed.");
+    }
+  };
+
+  const handleCreateMatch = async () => {
+    if (!scoreToken.trim()) {
+      setCreateStatus("Token required. Enter scorer/admin token.");
+      return;
+    }
+
+    setCreateStatus("Creating match...");
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/${selectedSport}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${scoreToken.trim()}`,
+          "X-User-Role": scorerRole,
+        },
+        body: JSON.stringify(createFormData),
+      });
+
+      const body = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(body?.error || "Failed to create match");
+      }
+
+      const createdMatch = body as MatchData;
+      setMatches((prevMatches) => [...prevMatches, createdMatch]);
+      setSelectedMatchId(createdMatch.id);
+      setPanelMode("update");
+      setFormData(getUpdateTemplate(selectedSport, createdMatch));
+      setCreateFormData(getCreateTemplate(selectedSport));
+      setCreateStatus("Match created successfully.");
+    } catch (error) {
+      setCreateStatus(error instanceof Error ? error.message : "Match creation failed.");
+    }
   };
 
   return (
@@ -343,6 +470,167 @@ export default function ScoreboardsLayout() {
             <h2 className="text-4xl font-bold text-[rgb(186,196,92)] uppercase font-gang-of-three tracking-wider">
               {selectedSport} Matches
             </h2>
+            <div className="mt-3 flex items-center gap-3 text-xs font-bold uppercase tracking-wider">
+              <span className={`inline-block h-2.5 w-2.5 rounded-full ${wsConnected ? "bg-emerald-400" : "bg-rose-500"}`} />
+              <span className={wsConnected ? "text-emerald-300" : "text-rose-300"}>
+                {wsConnected ? "Live updates connected" : "Live updates disconnected"}
+              </span>
+            </div>
+          </div>
+
+          {apiError && (
+            <div className="mb-6 border border-rose-500/40 bg-rose-950/30 p-4 text-sm text-rose-200">
+              {apiError}
+            </div>
+          )}
+
+          <div className="mb-6 rounded-2xl bg-[linear-gradient(145deg,rgba(37,81,43,0.28),rgba(13,13,13,0.96))] p-4 shadow-[0_14px_30px_rgba(0,0,0,0.32)] backdrop-blur-sm border border-[rgb(79,88,43)]/30">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-[rgb(186,196,92)]/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[rgb(186,196,92)]">
+                    Scorer Console
+                  </span>
+                  <span className="text-[11px] text-[#EAEAEA]/70">Create and update live match scores</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setScorerExpanded((prev) => !prev)}
+                className="rounded-full bg-[#0D0D0D]/70 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-[rgb(186,196,92)] ring-1 ring-[rgb(135,86,36)]/50 transition-colors hover:bg-[rgb(37,81,43)]/45"
+              >
+                {scorerExpanded ? "Collapse" : "Open Controls"}
+              </button>
+            </div>
+
+            {scorerExpanded && (
+              <div className="mt-4 space-y-3">
+                <div className="inline-flex items-center gap-1 rounded-full bg-[#0D0D0D]/70 p-1">
+                  <button
+                    type="button"
+                    onClick={() => setPanelMode("update")}
+                    className={`rounded-full px-3 py-1 text-[11px] font-semibold transition-all ${
+                      panelMode === "update"
+                        ? "bg-[rgb(186,196,92)] text-[#0D0D0D]"
+                        : "text-[#EAEAEA]/75 hover:text-[#EAEAEA]"
+                    }`}
+                  >
+                    Update
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPanelMode("create")}
+                    className={`rounded-full px-3 py-1 text-[11px] font-semibold transition-all ${
+                      panelMode === "create"
+                        ? "bg-[rgb(186,196,92)] text-[#0D0D0D]"
+                        : "text-[#EAEAEA]/75 hover:text-[#EAEAEA]"
+                    }`}
+                  >
+                    Create
+                  </button>
+                </div>
+
+                <div className="grid gap-2.5 md:grid-cols-[130px_1fr_1fr_auto] md:items-end">
+                  <label className="text-sm">
+                    <span className="mb-1 block text-[11px] font-medium text-[rgb(186,196,92)]/85">Role</span>
+                    <select
+                      value={scorerRole}
+                      onChange={(event) => setScorerRole(event.target.value as ScorerRole)}
+                        className="w-full rounded-lg border border-[rgb(186,196,92)]/28 bg-[#111711] px-3 py-2 text-sm text-[#F3F4F6] outline-none focus:border-[rgb(186,196,92)] focus:ring-2 focus:ring-[rgb(186,196,92)]/35"
+                    >
+                      <option value="scorer">scorer</option>
+                      <option value="admin">admin</option>
+                    </select>
+                  </label>
+
+                  <label className="text-sm">
+                    <span className="mb-1 block text-[11px] font-medium text-[rgb(186,196,92)]/85">Token</span>
+                    <input
+                      type="password"
+                      value={scoreToken}
+                      onChange={(event) => setScoreToken(event.target.value)}
+                      placeholder="scorer/admin token"
+                      className="w-full rounded-lg border border-[rgb(186,196,92)]/28 bg-[#111711] px-3 py-2 text-sm text-[#F3F4F6] placeholder:text-[#AAB08A]/75 outline-none focus:border-[rgb(186,196,92)] focus:ring-2 focus:ring-[rgb(186,196,92)]/35"
+                    />
+                  </label>
+
+                  {panelMode === "update" ? (
+                    <label className="text-sm">
+                      <span className="mb-1 block text-[11px] font-medium text-[rgb(186,196,92)]/85">Match</span>
+                      <select
+                        value={selectedMatchId ?? ""}
+                        onChange={(event) => handleMatchSelect(Number(event.target.value))}
+                        disabled={!editableMatches.length}
+                        className="w-full rounded-lg border border-[rgb(186,196,92)]/28 bg-[#111711] px-3 py-2 text-sm text-[#F3F4F6] outline-none focus:border-[rgb(186,196,92)] focus:ring-2 focus:ring-[rgb(186,196,92)]/35 disabled:opacity-50"
+                      >
+                        {!editableMatches.length && <option value="">No matches</option>}
+                        {editableMatches.map((match) => (
+                          <option key={match.id} value={match.id}>
+                            #{match.id} - {getMatchLabel(selectedSport, match)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ) : (
+                    <div className="rounded-lg bg-[#0D0D0D]/55 px-3 py-2 text-sm text-[#EAEAEA]/80">
+                      Creating a new {selectedSport} match
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (panelMode === "update") {
+                        if (selectedMatch) {
+                          setFormData(getUpdateTemplate(selectedSport, selectedMatch));
+                        }
+                      } else {
+                        setCreateFormData(getCreateTemplate(selectedSport));
+                      }
+                    }}
+                    className="rounded-lg bg-[rgb(186,196,92)]/12 px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-[rgb(186,196,92)] transition-colors hover:bg-[rgb(186,196,92)]/22"
+                  >
+                    Reset
+                  </button>
+                </div>
+
+                <div className="max-h-72 overflow-auto rounded-xl bg-[#0D0D0D]/35 p-3">
+                  {panelMode === "update" ? (
+                    <DynamicMatchForm sport={selectedSport} value={formData} onChange={handleFormDataChange} />
+                  ) : (
+                    <DynamicMatchForm sport={selectedSport} value={createFormData} onChange={handleCreateFormDataChange} />
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  {panelMode === "update" ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleScoreUpdate}
+                        disabled={!editableMatches.length}
+                        className="rounded-lg border border-[rgb(186,196,92)] bg-[rgb(186,196,92)]/12 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[rgb(186,196,92)] transition-colors hover:bg-[rgb(186,196,92)]/22 disabled:opacity-50"
+                      >
+                        Save Update
+                      </button>
+                      {updateStatus && <p className="text-xs text-[rgb(186,196,92)]/90">{updateStatus}</p>}
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleCreateMatch}
+                        className="rounded-lg border border-emerald-400/80 bg-emerald-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-emerald-300 transition-colors hover:bg-emerald-500/20"
+                      >
+                        Create Match
+                      </button>
+                      {createStatus && <p className="text-xs text-emerald-300/90">{createStatus}</p>}
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {loading ? (
@@ -397,6 +685,171 @@ function renderMatchCard(sport: SportId, match: MatchData) {
     default:
       return null;
   }
+}
+
+function DynamicMatchForm({
+  sport,
+  value,
+  onChange,
+}: {
+  sport: SportId;
+  value: MatchData;
+  onChange: (nextValue: MatchData) => void;
+}) {
+  const handlePrimitiveChange = (path: FieldPath, rawValue: string | boolean) => {
+    const currentValue = getValueByPath(value, path);
+    const nextValue = coerceInputValue(rawValue, currentValue);
+    onChange(setValueByPath(value, path, nextValue));
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="text-[11px] font-medium uppercase tracking-wider text-[#EAEAEA]/65">
+        {sport.charAt(0).toUpperCase() + sport.slice(1)} fields
+      </div>
+      <FieldGroup value={value} path={[]} onPrimitiveChange={handlePrimitiveChange} />
+    </div>
+  );
+}
+
+function FieldGroup({
+  value,
+  path,
+  onPrimitiveChange,
+}: {
+  value: MatchData;
+  path: FieldPath;
+  onPrimitiveChange: (path: FieldPath, rawValue: string | boolean) => void;
+}) {
+  const entries = Object.entries(value || {});
+  const inputClassName =
+    "w-full rounded-lg border border-[rgb(186,196,92)]/28 bg-[#111711] px-3 py-2 text-sm text-[#F3F4F6] placeholder:text-[#AAB08A]/75 outline-none focus:border-[rgb(186,196,92)] focus:ring-2 focus:ring-[rgb(186,196,92)]/35";
+
+  return (
+    <div className="space-y-3">
+      {entries.map(([key, fieldValue]) => {
+        const fieldPath = [...path, key];
+        const fieldId = fieldPath.join(".");
+        const label = prettifyKey(key);
+
+        if (Array.isArray(fieldValue)) {
+          return (
+            <label key={fieldId} className="block rounded-xl bg-[#0D0D0D]/42 p-3 text-sm">
+              <span className="mb-1.5 block text-[13px] font-medium text-[rgb(186,196,92)]/92">{label}</span>
+              <input
+                type="text"
+                value={fieldValue.join(", ")}
+                onChange={(event) => onPrimitiveChange(fieldPath, event.target.value)}
+                placeholder="Comma separated values"
+                className={inputClassName}
+              />
+            </label>
+          );
+        }
+
+        if (fieldValue !== null && typeof fieldValue === "object") {
+          return (
+            <div key={fieldId} className="rounded-xl bg-[#0D0D0D]/34 p-3">
+              <p className="mb-2 text-[13px] font-semibold text-[rgb(186,196,92)]">{label}</p>
+              <FieldGroup value={fieldValue} path={fieldPath} onPrimitiveChange={onPrimitiveChange} />
+            </div>
+          );
+        }
+
+        if (typeof fieldValue === "boolean") {
+          return (
+            <label key={fieldId} className="flex items-center gap-2 rounded-xl bg-[#0D0D0D]/50 px-3 py-2.5 text-sm">
+              <input
+                type="checkbox"
+                checked={fieldValue}
+                onChange={(event) => onPrimitiveChange(fieldPath, event.target.checked)}
+                className="h-4 w-4"
+              />
+              <span className="text-[12px] text-[#EAEAEA]/90">{label}</span>
+            </label>
+          );
+        }
+
+        const isNumeric = typeof fieldValue === "number";
+
+        return (
+          <div key={fieldId} className="grid gap-2 rounded-xl bg-[#0D0D0D]/46 px-3 py-2.5 md:grid-cols-[1fr_170px] md:items-center">
+            <span className="text-[12px] text-[#EAEAEA]/88">{label}</span>
+            <input
+              type={isNumeric ? "number" : "text"}
+              value={fieldValue ?? ""}
+              onChange={(event) => onPrimitiveChange(fieldPath, event.target.value)}
+              placeholder={isNumeric ? "Enter number" : `Enter ${label.toLowerCase()}`}
+              className={inputClassName}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function prettifyKey(key: string) {
+  return key
+    .replace(/([A-Z])/g, " $1")
+    .replace(/_/g, " ")
+    .trim();
+}
+
+function getValueByPath(source: MatchData, path: FieldPath) {
+  return path.reduce<any>((current, segment) => {
+    if (current && typeof current === "object") {
+      return current[segment];
+    }
+    return undefined;
+  }, source);
+}
+
+function setValueByPath(source: MatchData, path: FieldPath, value: any) {
+  if (!path.length) {
+    return source;
+  }
+
+  const next = JSON.parse(JSON.stringify(source || {}));
+  let cursor = next;
+
+  for (let index = 0; index < path.length - 1; index += 1) {
+    const segment = path[index];
+    if (!cursor[segment] || typeof cursor[segment] !== "object") {
+      cursor[segment] = {};
+    }
+    cursor = cursor[segment];
+  }
+
+  cursor[path[path.length - 1]] = value;
+  return next;
+}
+
+function coerceInputValue(rawValue: string | boolean, currentValue: any) {
+  if (typeof currentValue === "boolean") {
+    return Boolean(rawValue);
+  }
+
+  if (typeof currentValue === "number") {
+    const parsed = Number(rawValue);
+    return Number.isNaN(parsed) ? currentValue : parsed;
+  }
+
+  if (Array.isArray(currentValue)) {
+    const itemType = typeof currentValue[0];
+    const values = String(rawValue)
+      .split(",")
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+
+    if (itemType === "number") {
+      return values.map((item) => Number(item)).filter((item) => !Number.isNaN(item));
+    }
+
+    return values;
+  }
+
+  return String(rawValue);
 }
 
 function CricketMatchCard({ match }: { match: MatchData }) {

@@ -1,5 +1,8 @@
-let footballMatches = [];
-let matchIdCounter = 1;
+const { getInitialMatches, getNextCounter } = require("./seedMatches");
+const { getInitialSportMatches, saveSportMatches } = require("./matchStore");
+
+let footballMatches = getInitialSportMatches("football", getInitialMatches("football"));
+let matchIdCounter = getNextCounter(footballMatches);
 
 const getFootballMatches = () => footballMatches;
 
@@ -19,6 +22,7 @@ const createFootballMatch = (data) => {
     status: data.status || "",
   };
   footballMatches.push(newMatch);
+  saveSportMatches("football", footballMatches);
   return newMatch;
 };
 
@@ -26,6 +30,7 @@ const updateFootballMatch = (id, data) => {
   const index = footballMatches.findIndex((match) => match.id === parseInt(id));
   if (index !== -1) {
     footballMatches[index] = { ...footballMatches[index], ...data };
+    saveSportMatches("football", footballMatches);
     return footballMatches[index];
   }
   return null;
@@ -34,7 +39,9 @@ const updateFootballMatch = (id, data) => {
 const deleteFootballMatch = (id) => {
   const index = footballMatches.findIndex((match) => match.id === parseInt(id));
   if (index !== -1) {
-    return footballMatches.splice(index, 1)[0];
+    const removedMatch = footballMatches.splice(index, 1)[0];
+    saveSportMatches("football", footballMatches);
+    return removedMatch;
   }
   return null;
 };

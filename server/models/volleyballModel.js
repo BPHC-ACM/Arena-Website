@@ -1,5 +1,8 @@
-let volleyballMatches = [];
-let matchIdCounter = 1;
+const { getInitialMatches, getNextCounter } = require("./seedMatches");
+const { getInitialSportMatches, saveSportMatches } = require("./matchStore");
+
+let volleyballMatches = getInitialSportMatches("volleyball", getInitialMatches("volleyball"));
+let matchIdCounter = getNextCounter(volleyballMatches);
 
 const getVolleyballMatches = () => volleyballMatches;
 
@@ -23,6 +26,7 @@ const createVolleyballMatch = (data) => {
     status: data.status || "",
   };
   volleyballMatches.push(newMatch);
+  saveSportMatches("volleyball", volleyballMatches);
   return newMatch;
 };
 
@@ -30,6 +34,7 @@ const updateVolleyballMatch = (id, data) => {
   const index = volleyballMatches.findIndex((match) => match.id === parseInt(id));
   if (index !== -1) {
     volleyballMatches[index] = { ...volleyballMatches[index], ...data };
+    saveSportMatches("volleyball", volleyballMatches);
     return volleyballMatches[index];
   }
   return null;
@@ -38,7 +43,9 @@ const updateVolleyballMatch = (id, data) => {
 const deleteVolleyballMatch = (id) => {
   const index = volleyballMatches.findIndex((match) => match.id === parseInt(id));
   if (index !== -1) {
-    return volleyballMatches.splice(index, 1)[0];
+    const removedMatch = volleyballMatches.splice(index, 1)[0];
+    saveSportMatches("volleyball", volleyballMatches);
+    return removedMatch;
   }
   return null;
 };

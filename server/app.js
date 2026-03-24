@@ -1,7 +1,12 @@
 const express = require("express");
 const http = require("http");
 const WebSocket = require("ws");
+const path = require("path");
+const dotenv = require("dotenv");
 const socketHandler = require("./socket/socketHandler");
+
+dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, "../.env.local") });
 
 const { getCricketMatches } = require("./models/cricketModel");
 const { getBasketballMatches } = require("./models/basketballModel");
@@ -11,6 +16,7 @@ const { getBadmintonMatches } = require("./models/badmintonModel");
 const { getVolleyballMatches } = require("./models/volleyballModel");
 const { getKabaddiMatches } = require("./models/kabaddiModel");
 const { getFrisbeeMatches } = require("./models/frisbeeModel");
+const { saveSportMatches } = require("./models/matchStore");
 
 const cricketRoutes = require("./routes/cricket");
 const basketballRoutes = require("./routes/basketball");
@@ -29,8 +35,11 @@ app.use(express.json());
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-  res.header("Access-Control-Allow-Headers", "Content-Type");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-User-Role");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
   next();
 });
 
@@ -45,6 +54,10 @@ const emitAllSnapshots = () => {
   socketHandler.emitVolleyballUpdate(getVolleyballMatches());
   socketHandler.emitKabaddiUpdate(getKabaddiMatches());
   socketHandler.emitFrisbeeUpdate(getFrisbeeMatches());
+};
+
+const getExpectedWebSocketToken = () => {
+  return process.env.WS_TOKEN || process.env.SCORE_UPDATE_TOKEN || process.env.token || process.env.NEXT_PUBLIC_WS_TOKEN;
 };
 
 const parseClockToSeconds = (clock) => {
@@ -79,6 +92,7 @@ const startLiveTimers = () => {
       }
     });
     if (basketballChanged) {
+      saveSportMatches("basketball", basketballMatches);
       socketHandler.emitBasketballUpdate(basketballMatches);
     }
 
@@ -91,6 +105,7 @@ const startLiveTimers = () => {
       }
     });
     if (kabaddiChanged) {
+      saveSportMatches("kabaddi", kabaddiMatches);
       socketHandler.emitKabaddiUpdate(kabaddiMatches);
     }
 
@@ -104,6 +119,7 @@ const startLiveTimers = () => {
       }
     });
     if (frisbeeChanged) {
+      saveSportMatches("frisbee", frisbeeMatches);
       socketHandler.emitFrisbeeUpdate(frisbeeMatches);
     }
   }, 1000);
@@ -118,12 +134,29 @@ const startLiveTimers = () => {
       }
     });
     if (footballChanged) {
+      saveSportMatches("football", footballMatches);
       socketHandler.emitFootballUpdate(footballMatches);
     }
   }, 60000);
 };
 
-wss.on("connection", (ws) => {
+wss.on("connection", (ws, req) => {
+  const expectedToken = getExpectedWebSocketToken();
+  if (expectedToken) {
+    let token = "";
+    try {
+      const wsUrl = new URL(req.url || "", `http://${req.headers.host || "localhost"}`);
+      token = (wsUrl.searchParams.get("token") || "").trim();
+    } catch {
+      token = "";
+    }
+
+    if (!token || token !== expectedToken) {
+      ws.close(1008, "Invalid or missing websocket token");
+      return;
+    }
+  }
+
   console.log("WebSocket client connected");
 
   emitAllSnapshots();
