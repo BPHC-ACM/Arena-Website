@@ -13,6 +13,7 @@ const BannerLine = ({ reverse = false }: { reverse?: boolean }) => (
       color: sportsAccentRed,
       fontFamily: "'gangofthree', Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif",
       animation: reverse ? 'sports-marquee-reverse 60s linear infinite' : 'sports-marquee 60s linear infinite',
+      WebkitTransform: 'translateZ(0)',
     }}
   >
     {Array.from({ length: bannerRepeats }).map((_, repeatIdx) => (
@@ -37,35 +38,20 @@ const BannerLine = ({ reverse = false }: { reverse?: boolean }) => (
 export const SportsSection = () => {
   return (
     <>
-      <style jsx global>{`
+      <style>{`
         @keyframes sports-marquee {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
         }
-
         @keyframes sports-marquee-reverse {
-          0% {
-            transform: translateX(-50%);
-          }
-          100% {
-            transform: translateX(0);
-          }
+          0% { transform: translateX(-50%); }
+          100% { transform: translateX(0); }
         }
-
         @keyframes sports-vector-marquee {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(calc(-170vw + var(--sports-vector-overlap)));
-          }
+          0% { transform: translateX(0); }
+          100% { transform: translateX(calc(-170vw + var(--sports-vector-overlap))); }
         }
       `}</style>
-
       <section
         className="grid h-[740px] w-full select-none overflow-hidden bg-black grid-rows-[22px_1fr_22px] min-[1280px]:[--sports-layout-scale:1.46] min-[1280px]:[--sports-track-pad-top:154px] min-[1280px]:[--sports-track-pad-bottom:84px] min-[1600px]:[--sports-layout-scale:1.56] min-[1600px]:[--sports-track-pad-top:180px] min-[1600px]:[--sports-track-pad-bottom:100px] max-[900px]:h-[600px] max-[900px]:grid-rows-[20px_1fr_20px] max-[900px]:[--sports-layout-scale:1.14] max-[900px]:[--sports-track-pad-top:95px] max-[900px]:[--sports-track-pad-bottom:55px] max-[600px]:h-[460px] max-[600px]:grid-rows-[18px_1fr_18px] max-[600px]:[--sports-layout-scale:0.87] max-[600px]:[--sports-track-pad-top:66px] max-[600px]:[--sports-track-pad-bottom:36px]"
         style={{
@@ -82,7 +68,7 @@ export const SportsSection = () => {
       <div className="relative box-border flex h-[696px] items-center overflow-hidden bg-[linear-gradient(180deg,#050505_0%,#000_50%,#050505_100%)] pt-[var(--sports-track-pad-top)] pb-[var(--sports-track-pad-bottom)] max-[900px]:h-[560px] max-[600px]:h-[424px]">
 
         <div className="pointer-events-none absolute top-1/2 left-0 w-full -translate-y-1/2">
-          <div className="flex w-max" style={{ animation: 'sports-vector-marquee 45s linear infinite' }}>
+          <div className="flex w-max" style={{ animation: 'sports-vector-marquee 45s linear infinite', WebkitTransform: 'translateZ(0)' }}>
             <img
               className="h-[calc(382.5px*var(--sports-layout-scale))] w-[170vw] shrink-0 select-none object-cover object-center filter-[brightness(1.04)]"
               src={marqueeVector}
