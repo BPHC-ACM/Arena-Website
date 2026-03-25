@@ -1,10 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import NavMenu from "./NavMenu";
 
 export default function GlobalNav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Hide the global navigation menu toggle on the scoreboards and admin pages 
+  // since they have their own internal navigation layouts and back buttons
+  if (pathname?.startsWith('/scoreboards') || pathname?.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <>
