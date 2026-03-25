@@ -3,14 +3,14 @@ import Image from 'next/image';
 
 const quickLinks = [
   { label: "SCORE", href: "/scoreboards" },
-  { label: "GALLERY", href: "#" },
-  { label: "TEAM", href: "#" },
-  { label: "SPONSORS", href: "#" },
+  { label: "GALLERY", href: "/gallery" },
+  { label: "TEAM", href: "/team" },
+  { label: "SPONSORS", href: "/sponsors" },
 ];
 
 const contactItems = [
-  { icon: "phone", text: "+91 90000 00001" },
-  { icon: "mail", text: "ARENA@GMAIL.COM" },
+  { icon: "phone", text: "+91 99459 23134" },
+  { icon: "mail", text: "ARENA@HYDERABAD.BITS-PILANI.AC.IN" },
   { icon: "location", text: "BITS PILANI, HYDERABAD CAMPUS" },
 ];
 
