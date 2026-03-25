@@ -18,7 +18,19 @@ export type SportId =
   | 'badminton'
   | 'volleyball'
   | 'kabaddi'
-  | 'frisbee';
+  | 'frisbee'
+  | 'carrom'
+  | 'chess'
+  | 'hockey'
+  | 'khokho'
+  | 'powerlifting'
+  | 'skating'
+  | '8ball'
+  | 'snooker'
+  | 'squash'
+  | 'swimming'
+  | 'tabletennis'
+  | 'throwball';
 
 export const SPORTS: SportConfig[] = [
   {
@@ -75,6 +87,90 @@ export const SPORTS: SportConfig[] = [
     name: 'Frisbee',
     shortName: 'FRS',
     icon: 'fa-duotone fa-solid fa-flying-disc',
+    isTeamSport: true,
+  },
+  {
+    id: 'carrom',
+    name: 'Carrom',
+    shortName: 'CAR',
+    icon: 'fa-sharp fa-solid fa-chess-board',
+    isTeamSport: false,
+  },
+  {
+    id: 'chess',
+    name: 'Chess',
+    shortName: 'CHE',
+    icon: 'fa-sharp fa-solid fa-chess',
+    isTeamSport: false,
+  },
+  {
+    id: 'hockey',
+    name: 'Hockey',
+    shortName: 'HOC',
+    icon: 'fa-sharp fa-solid fa-hockey-puck',
+    isTeamSport: true,
+  },
+  {
+    id: 'khokho',
+    name: 'Kho Kho',
+    shortName: 'KKO',
+    icon: 'fa-sharp fa-solid fa-person-running',
+    isTeamSport: true,
+  },
+  {
+    id: 'powerlifting',
+    name: 'Powerlifting',
+    shortName: 'PWL',
+    icon: 'fa-sharp fa-solid fa-dumbbell',
+    isTeamSport: false,
+  },
+  {
+    id: 'skating',
+    name: 'Skating',
+    shortName: 'SKT',
+    icon: 'fa-sharp fa-solid fa-skating',
+    isTeamSport: false,
+  },
+  {
+    id: '8ball',
+    name: '8 Ball Pool',
+    shortName: '8BP',
+    icon: 'fa-sharp fa-solid fa-pool-8-ball',
+    isTeamSport: false,
+  },
+  {
+    id: 'snooker',
+    name: 'Snooker',
+    shortName: 'SNK',
+    icon: 'fa-sharp fa-solid fa-billiard-cue',
+    isTeamSport: false,
+  },
+  {
+    id: 'squash',
+    name: 'Squash',
+    shortName: 'SQH',
+    icon: 'fa-sharp fa-solid fa-racquet',
+    isTeamSport: false,
+  },
+  {
+    id: 'swimming',
+    name: 'Swimming',
+    shortName: 'SWM',
+    icon: 'fa-sharp fa-solid fa-person-swimming',
+    isTeamSport: false,
+  },
+  {
+    id: 'tabletennis',
+    name: 'Table Tennis',
+    shortName: 'TTE',
+    icon: 'fa-sharp fa-solid fa-table-tennis-paddle-ball',
+    isTeamSport: false,
+  },
+  {
+    id: 'throwball',
+    name: 'Throwball',
+    shortName: 'THB',
+    icon: 'fa-sharp fa-solid fa-volleyball',
     isTeamSport: true,
   },
 ];
