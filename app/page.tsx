@@ -521,7 +521,7 @@ export default function Home() {
         <div className="relative w-full px-[6vw] min-h-[300px] md:min-h-[500px] flex items-end">
           
           {/* WHAT IS THEME Block - Positioned on top with z-20 */}
-          <div className="relative z-20 flex flex-col items-start pb-4 md:pb-12 pointer-events-none -translate-y-[220px] md:-translate-y-[50vh] sm:-translate-y-[90px] translate-x-12">
+          <div className="relative z-20 flex flex-col items-start pb-4 md:pb-12 pointer-events-none -translate-y-[220px] sm:-translate-y-[90px] md:-translate-y-[400px] translate-x-45">
             <span
               className="text-[#EE271F] uppercase tracking-widest"
               style={{
@@ -548,13 +548,12 @@ export default function Home() {
               src="/ninja2.png"
               alt="Ninja Theme Mascot"
               className="w-full h-auto max-h-[85%] object-contain object-right-bottom scale-110 translate-x-[-5%] translate-y-[-45%]" 
-              /* scale-110 and translate make the ninja feel larger and fill the space */
             />
           </div>
         </div>
       </section>
 
-      <div className="relative z-40 -mt-[20vh] max-[900px]:-mt-[14vh] max-[600px]:-mt-[10vh]">
+      <div className="relative z-40 -mt-[20vh] max-[900px]:-mt-[14vh] max-[600px]:-mt-[5vh]">
         <SportsSection />
       </div>
       <TurtleBg />
