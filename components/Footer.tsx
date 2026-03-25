@@ -1,7 +1,12 @@
 import React from 'react';
 import Image from 'next/image';
 
-const quickLinks = ["SCORE", "GALLERY", "TEAM", "SPONSORS"];
+const quickLinks = [
+  { label: "SCORE", href: "/scoreboards" },
+  { label: "GALLERY", href: "#" },
+  { label: "TEAM", href: "#" },
+  { label: "SPONSORS", href: "#" },
+];
 
 const contactItems = [
   { icon: "phone", text: "+91 90000 00001" },
@@ -79,12 +84,12 @@ export default function Footer() {
             <nav className="flex flex-col gap-2">
               {quickLinks.map((item) => (
                 <a
-                  key={item}
-                  href="#"
+                  key={item.label}
+                  href={item.href}
                   className="text-[#8c9c81] transition-colors hover:text-[#bacb48]"
                   style={{ ...customFont, fontSize: "clamp(24px, 2.5vw, 34px)", letterSpacing: "0.06em", lineHeight: 1.1 }}
                 >
-                  {item}
+                  {item.label}
                 </a>
               ))}
             </nav>
@@ -143,8 +148,8 @@ export default function Footer() {
       </div>
 
       {/* Bottom Right Graphics */}
-      <div className="absolute bottom-0 right-0 h-[200px] md:h-[260px] lg:h-[320px]
-w-[150px] md:w-[200px] lg:w-[250px] pointer-events-none z-0">
+      <div className="absolute bottom-0 right-0 h-[240px] md:h-[300px] lg:h-[360px]
+    w-[220px] md:w-[280px] lg:w-[340px] pointer-events-none z-0">
         
         {/* CSS Polygon Fallback */}
         <div
@@ -152,13 +157,22 @@ w-[150px] md:w-[200px] lg:w-[250px] pointer-events-none z-0">
           style={{ clipPath: "polygon(10% 60%, 100% 35%, 100% 100%, 0% 100%)" }}
         />
 
-        <Image
-          src="/white%20var%201.png"
-          alt="Department of Technical Arts logo"
-          width={160}
-          height={160}
-          className="absolute bottom-6 right-6 md:bottom-5 md:right-10 h-auto w-[100px] md:w-[130px] lg:w-[160px] object-contain"
-        />
+        <div className="absolute bottom-4 right-0 md:bottom-6 md:right-5 lg:right-3 flex items-end gap-3 md:gap-4 lg:gap-5">
+          <Image
+            src="/white%20var%201.png"
+            alt="Department of Technical Arts logo"
+            width={130}
+            height={130}
+            className="h-auto w-[88px] md:w-[112px] lg:w-[132px] object-contain -translate-y-1 md:-translate-y-2"
+          />
+          <Image
+            src="/acm-logo.png"
+            alt="BITS ACM logo"
+            width={160}
+            height={160}
+            className="h-auto w-[92px] md:w-[118px] lg:w-[140px] object-contain"
+          />
+        </div>
       </div>
     </footer>
   );

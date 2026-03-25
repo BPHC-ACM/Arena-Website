@@ -12,7 +12,7 @@ interface NavMenuProps {
 
 const navLinks = [
   { name: "HOME", path: "/" },
-  { name: "SCOREBOARD", path: "/scoreboard", color: "text-[#EE271F]" },
+  { name: "SCOREBOARD", path: "/scoreboards", color: "text-[#EE271F]" },
   { name: "GALLERY", path: "/gallery" },
   { name: "TEAM", path: "/team" },
   { name: "SPONSORS", path: "/sponsors" },
