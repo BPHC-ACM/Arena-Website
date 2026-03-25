@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
+import { motion, useScroll, useTransform, MotionValue, transform } from "framer-motion";
 import Image from "next/image";
 
 const arenaData = [
@@ -115,8 +115,8 @@ function GalleryItem({ item, index, total, progress }: { item: any, index: numbe
   const start = peak - step; 
   const end = peak + step;   
 
-  const z = useTransform(progress, [start, peak, end], [-2500, 0, 1500]);
-  const opacity = useTransform(progress, [start, peak, end], [0, 1, 0]);
+  const z = useTransform(progress, (v) => transform(v, [start, peak, end], [-2500, 0, 1500]));
+  const opacity = useTransform(progress, (v) => transform(v, [start, peak, end], [0, 1, 0]));
 
   return (
     <motion.div
@@ -147,8 +147,8 @@ function GalleryCaption({ title, index, total, progress }: { title: string, inde
   const start = peak - (step * 0.4);
   const end = peak + (step * 0.4);
 
-  const y = useTransform(progress, [start, peak, end], ["100%", "0%", "-100%"]);
-  const opacity = useTransform(progress, [start, peak, end], [0, 1, 0]);
+  const y = useTransform(progress, (v) => transform(v, [start, peak, end], ["100%", "0%", "-100%"]));
+  const opacity = useTransform(progress, (v) => transform(v, [start, peak, end], [0, 1, 0]));
 
   return (
     <motion.div

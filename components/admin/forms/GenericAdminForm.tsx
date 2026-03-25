@@ -20,6 +20,18 @@ const STATUS_OPTS: Record<SportId, string[]> = {
   volleyball: ["Set 1", "Set 2", "Set 3", "Set 4", "Set 5", "Match complete"],
   kabaddi:    ["1st half", "Half time", "2nd half", "Match complete"],
   frisbee:    ["1st half", "Half time", "2nd half", "Game complete"],
+  carrom:     ["Board 1", "Board 2", "Board 3", "Match complete"],
+  chess:      ["Game started", "Mid-game", "Endgame", "Game complete"],
+  hockey:     ["Period 1", "Period 2", "Period 3", "Overtime", "Match complete"],
+  khokho:     ["Inning 1", "Inning 2", "Inning 3", "Inning 4", "Match complete"],
+  powerlifting: ["Squat", "Bench Press", "Deadlift", "Competition complete"],
+  skating:    ["Race started", "In progress", "Race complete"],
+  "8ball":    ["Frame 1", "Frame 2", "Frame 3", "Frame 4", "Frame 5", "Match complete"],
+  snooker:    ["Frame 1", "Frame 2", "Frame 3", "Frame 4", "Frame 5", "Match complete"],
+  squash:     ["Game 1", "Game 2", "Game 3", "Game 4", "Game 5", "Match complete"],
+  swimming:   ["Heat started", "In progress", "Race complete"],
+  tabletennis: ["Game 1", "Game 2", "Game 3", "Game 4", "Game 5", "Match complete"],
+  throwball:  ["Set 1", "Set 2", "Set 3", "Match complete"],
 };
 
 const defaults: Record<SportId, any> = {
@@ -31,6 +43,18 @@ const defaults: Record<SportId, any> = {
   volleyball: { teamA:"", teamB:"", setsTeamA:[], setsTeamB:[], currentSet:1, currentPointsTeamA:0, currentPointsTeamB:0, setWinsA:0, setWinsB:0, bestOf:5, status:"Set 1" },
   kabaddi:    { teamA:"", teamB:"", scoreA:0, scoreB:0, playersOnMatA:7, playersOnMatB:7, raidTimer:30, raidingTeam:"", bonusActive:false, superRaidActive:false, half:1, timeRemaining:"20:00", status:"1st half" },
   frisbee:    { teamA:"", teamB:"", scoreA:0, scoreB:0, timeRemaining:"48:00", pointCap:21, possession:"", status:"1st half" },
+  carrom:     { player1:"", player2:"", scorePlayer1:0, scorePlayer2:0, currentBoard:1, bestOf:3, boardsPlayer1:[], boardsPlayer2:[], striker:1, status:"Board 1" },
+  chess:      { player1:"", player2:"", timePlayer1:"10:00", timePlayer2:"10:00", movesPlayer1:0, movesPlayer2:0, currentTurn:1, timeControl:"10+0", result:"", status:"Game started" },
+  hockey:     { teamA:"", teamB:"", scoreA:0, scoreB:0, currentPeriod:1, matchTime:"0:00", periodScoresA:[0,0,0], periodScoresB:[0,0,0], penaltiesA:0, penaltiesB:0, status:"Period 1" },
+  khokho:     { teamA:"", teamB:"", scoreA:0, scoreB:0, currentInning:1, chasingTeam:"A", defendersRemaining:7, timeRemaining:"7:00", inningsScoreA:[], inningsScoreB:[], status:"Inning 1" },
+  powerlifting: { athlete1:"", athlete2:"", squatAttempt1Athlete1:0, squatAttempt2Athlete1:0, squatAttempt3Athlete1:0, benchAttempt1Athlete1:0, benchAttempt2Athlete1:0, benchAttempt3Athlete1:0, deadliftAttempt1Athlete1:0, deadliftAttempt2Athlete1:0, deadliftAttempt3Athlete1:0, squatAttempt1Athlete2:0, squatAttempt2Athlete2:0, squatAttempt3Athlete2:0, benchAttempt1Athlete2:0, benchAttempt2Athlete2:0, benchAttempt3Athlete2:0, deadliftAttempt1Athlete2:0, deadliftAttempt2Athlete2:0, deadliftAttempt3Athlete2:0, totalAthlete1:0, totalAthlete2:0, currentLift:"squat", weightClass:"", status:"Squat" },
+  skating:    { athlete1:"", athlete2:"", time1:"", time2:"", distance:"", eventType:"speed", scoreAthlete1:0, scoreAthlete2:0, status:"Race started" },
+  "8ball":    { player1:"", player2:"", framesPlayer1:0, framesPlayer2:0, currentFrame:1, bestOf:5, ballsRemainingPlayer1:7, ballsRemainingPlayer2:7, onBreak:1, status:"Frame 1" },
+  snooker:    { player1:"", player2:"", framesPlayer1:0, framesPlayer2:0, currentFrame:1, currentScorePlayer1:0, currentScorePlayer2:0, bestOf:7, onTable:1, remainingPoints:147, status:"Frame 1" },
+  squash:     { player1:"", player2:"", gamesPlayer1:[], gamesPlayer2:[], currentGame:1, currentPointsPlayer1:0, currentPointsPlayer2:0, server:1, bestOf:5, status:"Game 1" },
+  swimming:   { swimmer1:"", swimmer2:"", time1:"", time2:"", distance:"", stroke:"", lane1:0, lane2:0, status:"Heat started" },
+  tabletennis: { player1:"", player2:"", gamesPlayer1:[], gamesPlayer2:[], currentGame:1, currentPointsPlayer1:0, currentPointsPlayer2:0, server:1, bestOf:5, status:"Game 1" },
+  throwball:  { teamA:"", teamB:"", setsTeamA:[], setsTeamB:[], currentSet:1, currentPointsTeamA:0, currentPointsTeamB:0, setWinsA:0, setWinsB:0, bestOf:3, servingTeam:"A", status:"Set 1" },
 };
 
 // Shared field component
@@ -546,6 +570,149 @@ export function GenericAdminForm({ sport, match, onSave, isCreate }: Props) {
           <TimerToggle running={!!form.clockRunning} onToggle={v=>set("clockRunning",v)} />
         </div>
         <TF label="Point Cap" path="pointCap" type="number" {...fp} />
+      </div>
+      <StatusSelect sport={sport} value={form.status??""} onChange={handleStatusChange} />
+      {isCreate && <SaveBtn onClick={submitForm} isCreate={isCreate} />}
+    </div>
+  );
+
+  // ── Squash ─────────────────────────────────────────────────────────────────
+  if (sport==="squash") {
+    const winRally=(player:1|2)=>{
+      const f=player===1?"currentPointsPlayer1":"currentPointsPlayer2";
+      const oF=player===1?"currentPointsPlayer2":"currentPointsPlayer1";
+      const pts=(form[f]||0)+1, opp=(form[oF]||0);
+      if(pts>=11&&pts-opp>=2){
+        const g1=[...(form.gamesPlayer1??[])], g2=[...(form.gamesPlayer2??[])];
+        g1.push(player===1?pts:opp); g2.push(player===2?pts:opp);
+        setForm((p:any)=>({...p,gamesPlayer1:g1,gamesPlayer2:g2,currentGame:(p.currentGame||1)+1,currentPointsPlayer1:0,currentPointsPlayer2:0,server:player}));
+      } else setForm((p:any)=>({...p,[f]:pts,server:player}));
+    };
+    return (
+      <div className="space-y-5">
+        <div className="grid grid-cols-2 gap-3">
+          <TF label="Player 1" path="player1" placeholder="Player A" {...fp} />
+          <TF label="Player 2" path="player2" placeholder="Player B" {...fp} />
+        </div>
+        <Separator className="bg-[#1e1e1e]" />
+        <Label className="text-xs text-[#888] font-medium uppercase tracking-wider">Rally Won By</Label>
+        <div className="flex gap-3">
+          <button onClick={()=>winRally(1)} className="flex-1 py-4 rounded-xl border text-sm font-bold" style={{background:`${ACCENT}18`,borderColor:`${ACCENT}44`,color:ACCENT}}>+1 {form.player1||"P1"}</button>
+          <button onClick={()=>winRally(2)} className="flex-1 py-4 rounded-xl border text-sm font-bold text-[#ccc]" style={{background:"#161616",borderColor:"#2a2a2a"}}>+1 {form.player2||"P2"}</button>
+        </div>
+        <div className="flex gap-6 py-3 rounded-xl bg-[#0d0d0d] border border-[#1e1e1e] justify-center">
+          <div className="text-center"><p className="text-xs text-[#888]">{form.player1||"P1"}</p><p className="font-mono text-3xl font-extrabold text-white mt-1">{form.currentPointsPlayer1||0}</p></div>
+          <div className="self-center text-xs text-[#444]">Game {form.currentGame}</div>
+          <div className="text-center"><p className="text-xs text-[#888]">{form.player2||"P2"}</p><p className="font-mono text-3xl font-extrabold text-white mt-1">{form.currentPointsPlayer2||0}</p></div>
+        </div>
+        <StatusSelect sport={sport} value={form.status??""} onChange={handleStatusChange} />
+        {isCreate && <SaveBtn onClick={submitForm} isCreate={isCreate} />}
+      </div>
+    );
+  }
+
+  // ── Table Tennis ───────────────────────────────────────────────────────────
+  if (sport==="tabletennis") {
+    const winRally=(player:1|2)=>{
+      const f=player===1?"currentPointsPlayer1":"currentPointsPlayer2";
+      const oF=player===1?"currentPointsPlayer2":"currentPointsPlayer1";
+      const pts=(form[f]||0)+1, opp=(form[oF]||0);
+      if(pts>=11&&pts-opp>=2){
+        const g1=[...(form.gamesPlayer1??[])], g2=[...(form.gamesPlayer2??[])];
+        g1.push(player===1?pts:opp); g2.push(player===2?pts:opp);
+        setForm((p:any)=>({...p,gamesPlayer1:g1,gamesPlayer2:g2,currentGame:(p.currentGame||1)+1,currentPointsPlayer1:0,currentPointsPlayer2:0,server:player}));
+      } else setForm((p:any)=>({...p,[f]:pts,server:player}));
+    };
+    return (
+      <div className="space-y-5">
+        <div className="grid grid-cols-2 gap-3">
+          <TF label="Player 1" path="player1" placeholder="Player A" {...fp} />
+          <TF label="Player 2" path="player2" placeholder="Player B" {...fp} />
+        </div>
+        <Separator className="bg-[#1e1e1e]" />
+        <Label className="text-xs text-[#888] font-medium uppercase tracking-wider">Rally Won By</Label>
+        <div className="flex gap-3">
+          <button onClick={()=>winRally(1)} className="flex-1 py-4 rounded-xl border text-sm font-bold" style={{background:`${ACCENT}18`,borderColor:`${ACCENT}44`,color:ACCENT}}>+1 {form.player1||"P1"}</button>
+          <button onClick={()=>winRally(2)} className="flex-1 py-4 rounded-xl border text-sm font-bold text-[#ccc]" style={{background:"#161616",borderColor:"#2a2a2a"}}>+1 {form.player2||"P2"}</button>
+        </div>
+        <div className="flex gap-6 py-3 rounded-xl bg-[#0d0d0d] border border-[#1e1e1e] justify-center">
+          <div className="text-center"><p className="text-xs text-[#888]">{form.player1||"P1"}</p><p className="font-mono text-3xl font-extrabold text-white mt-1">{form.currentPointsPlayer1||0}</p></div>
+          <div className="self-center text-xs text-[#444]">Game {form.currentGame}</div>
+          <div className="text-center"><p className="text-xs text-[#888]">{form.player2||"P2"}</p><p className="font-mono text-3xl font-extrabold text-white mt-1">{form.currentPointsPlayer2||0}</p></div>
+        </div>
+        <StatusSelect sport={sport} value={form.status??""} onChange={handleStatusChange} />
+        {isCreate && <SaveBtn onClick={submitForm} isCreate={isCreate} />}
+      </div>
+    );
+  }
+
+  // ── Throwball ──────────────────────────────────────────────────────────────
+  if (sport==="throwball") {
+    const winPt=(team:"A"|"B")=>{
+      const f=team==="A"?"currentPointsTeamA":"currentPointsTeamB";
+      const oF=team==="A"?"currentPointsTeamB":"currentPointsTeamA";
+      const pts=(form[f]||0)+1, opp=(form[oF]||0);
+      const minPts=15;
+      if(pts>=minPts&&pts-opp>=2){
+        const sa=[...(form.setsTeamA??[])],sb=[...(form.setsTeamB??[])];
+        sa.push(team==="A"?pts:opp); sb.push(team==="B"?pts:opp);
+        const wA=(form.setWinsA||0)+(team==="A"?1:0), wB=(form.setWinsB||0)+(team==="B"?1:0);
+        setForm((p:any)=>({...p,setsTeamA:sa,setsTeamB:sb,setWinsA:wA,setWinsB:wB,currentSet:(p.currentSet||1)+1,currentPointsTeamA:0,currentPointsTeamB:0}));
+      } else setForm((p:any)=>({...p,[f]:pts}));
+    };
+    return (
+      <div className="space-y-5">
+        <div className="grid grid-cols-2 gap-3">
+          <TF label="Team A" path="teamA" placeholder="Team A" {...fp} />
+          <TF label="Team B" path="teamB" placeholder="Team B" {...fp} />
+        </div>
+        <Separator className="bg-[#1e1e1e]" />
+        <Label className="text-xs text-[#888] font-medium uppercase tracking-wider">Point Scored By</Label>
+        <div className="flex gap-3">
+          <button onClick={()=>winPt("A")} className="flex-1 py-4 rounded-xl border text-sm font-bold" style={{background:`${ACCENT}18`,borderColor:`${ACCENT}44`,color:ACCENT}}>+1 {form.teamA||"A"}</button>
+          <button onClick={()=>winPt("B")} className="flex-1 py-4 rounded-xl border text-sm font-bold text-[#ccc]" style={{background:"#161616",borderColor:"#2a2a2a"}}>+1 {form.teamB||"B"}</button>
+        </div>
+        <div className="flex gap-6 py-3 rounded-xl bg-[#0d0d0d] border border-[#1e1e1e] justify-center">
+          <div className="text-center"><p className="text-xs text-[#888]">{form.teamA||"A"}</p><p className="font-mono text-3xl font-extrabold text-white mt-1">{form.currentPointsTeamA||0}</p><p className="text-xs text-[#888] mt-1">{form.setWinsA||0} sets</p></div>
+          <div className="self-center text-xs text-[#444]">Set {form.currentSet}</div>
+          <div className="text-center"><p className="text-xs text-[#888]">{form.teamB||"B"}</p><p className="font-mono text-3xl font-extrabold text-white mt-1">{form.currentPointsTeamB||0}</p><p className="text-xs text-[#888] mt-1">{form.setWinsB||0} sets</p></div>
+        </div>
+        <StatusSelect sport={sport} value={form.status??""} onChange={handleStatusChange} />
+        {isCreate && <SaveBtn onClick={submitForm} isCreate={isCreate} />}
+      </div>
+    );
+  }
+
+  // ── Hockey ─────────────────────────────────────────────────────────────────
+  if (sport==="hockey") return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 gap-3">
+        <TF label="Team A" path="teamA" placeholder="Team A" {...fp} />
+        <TF label="Team B" path="teamB" placeholder="Team B" {...fp} />
+      </div>
+      <Separator className="bg-[#1e1e1e]" />
+      <div className="flex gap-3">
+        <ScorePanel name={form.teamA||"Team A"} score={form.scoreA} onDelta={d=>set("scoreA",Math.max(0,form.scoreA+d))} />
+        <ScorePanel name={form.teamB||"Team B"} score={form.scoreB} onDelta={d=>set("scoreB",Math.max(0,form.scoreB+d))} />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <TF label="Current Period" path="currentPeriod" type="number" {...fp} />
+        <TF label="Match Time" path="matchTime" placeholder="0:00" {...fp} />
+      </div>
+      <StatusSelect sport={sport} value={form.status??""} onChange={handleStatusChange} />
+      {isCreate && <SaveBtn onClick={submitForm} isCreate={isCreate} />}
+    </div>
+  );
+
+  // ── Carrom, Chess, Kho Kho, Powerlifting, Skating, 8ball, Snooker, Swimming ─
+  // Simple forms with basic fields
+  if (sport==="carrom" || sport==="chess" || sport==="khokho" || sport==="powerlifting" || sport==="skating" || sport==="8ball" || sport==="snooker" || sport==="swimming") return (
+    <div className="space-y-5">
+      <p className="text-sm text-[#aaa]">Basic form for {sport}. Use manual field entry.</p>
+      <div className="grid grid-cols-2 gap-3">
+        {Object.keys(form).slice(0, 10).map(key => (
+          <TF key={key} label={key} path={key} {...fp} />
+        ))}
       </div>
       <StatusSelect sport={sport} value={form.status??""} onChange={handleStatusChange} />
       {isCreate && <SaveBtn onClick={submitForm} isCreate={isCreate} />}
