@@ -15,6 +15,8 @@ export default function Home() {
 
   const [heroOpacity, setHeroOpacity] = useState(1);
   const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
+  const [isMobile, setIsMobile] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // --- Transition State ---
   const [transitionProgress, setTransitionProgress] = useState(0);
@@ -26,6 +28,15 @@ export default function Home() {
   const [fakeProgress, setFakeProgress] = useState(0);
 
   const frameCount = 141;
+
+  // Mobile detection
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    setIsHydrated(true);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // ---> TRUE RANDOMIZED MAZE ALGORITHM (NO BLINKING) <---
   useEffect(() => {
@@ -171,7 +182,7 @@ export default function Home() {
         if (prev >= 100) return 100;
         return prev + 1;
       });
-    }, 30);
+    }, 10);
     return () => clearInterval(progressInterval);
   }, [isLoading]);
 
@@ -337,9 +348,14 @@ export default function Home() {
               alt="Arena Background"
             />
             <img
-              src="/ninja_and_text.png"
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-200 ease-out"
-              style={{ transform: `translate(${mouseOffset.x * 1.5}px, ${mouseOffset.y * 1.5}px) scale(1.05)` }}
+              src={isHydrated ? (isMobile ? "/arena_cover_mobile.png" : "/ninja_and_text.png") : "/ninja_and_text.png"}
+              className="absolute inset-0 w-full h-full transition-transform duration-200 ease-out"
+              style={{
+                objectFit: isMobile ? 'contain' : 'cover',
+                objectPosition: isMobile ? 'center 15%' : 'center',
+                transform: isMobile ? 'scale(1)' : `translate(${mouseOffset.x * 1.5}px, ${mouseOffset.y * 1.5}px) scale(1.05)`,
+                imageRendering: 'crisp-edges'
+              }}
               alt="Arena Foreground"
             />
           </div>
@@ -437,7 +453,7 @@ export default function Home() {
           </div>
 
           {/* Right: Text Column */}
-          <div className="flex flex-col items-end text-right gap-9 max-w-[520px] ml-auto transform -translate-y-40">
+          <div className="flex flex-col items-end text-right gap-9 max-w-[520px] ml-auto transform -translate-y-[10px] sm:-translate-y-[40px]">
 
             {/* Paragraph */}
             <p
@@ -505,21 +521,21 @@ export default function Home() {
         <div className="relative w-full px-[6vw] min-h-[300px] md:min-h-[500px] flex items-end">
           
           {/* WHAT IS THEME Block - Positioned on top with z-20 */}
-          <div className="relative z-20 flex flex-col items-start pb-4 md:pb-12 pointer-events-none -translate-y-90 translate-x-12">
+          <div className="relative z-20 flex flex-col items-start pb-4 md:pb-12 pointer-events-none -translate-y-[220px] md:-translate-y-[50vh] sm:-translate-y-[90px] translate-x-12">
             <span
               className="text-[#EE271F] uppercase tracking-widest"
               style={{
                 fontFamily: "'Tillburg', 'Impact', sans-serif",
-                fontSize: "clamp(14px, 2vw, 26px)", // Smaller size
+                fontSize: "clamp(14px, 2vw, 26px)",
               }}
             >
-              WHAT IS THE
+              WHAT IS
             </span>
             <h2
               className="text-[#EE271F] uppercase leading-[0.8] -ml-1"
               style={{
                 fontFamily: "'Tillburg', 'Impact', sans-serif",
-                fontSize: "clamp(52px, 10vw, 130px)", // Reduced from 160px/240px
+                fontSize: "clamp(52px, 10vw, 130px)",
               }}
             >
               THEME?
