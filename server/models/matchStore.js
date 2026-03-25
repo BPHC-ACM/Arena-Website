@@ -1,58 +1,65 @@
-const fs = require("fs");
-const path = require("path");
+const { createClient } = require("@supabase/supabase-js");
 
-const DATA_DIR = path.resolve(__dirname, "../data");
-const STORE_FILE = path.join(DATA_DIR, "matches.json");
+const supabaseUrl = process.env.supabaseURL || process.env.SUPABASE_URL || "https://placeholder.supabase.co";
+const supabaseKey = process.env.key || process.env.SUPABASE_ANON_KEY || "placeholder-key";
 
-const ensureStoreFile = () => {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+// Only init client if valid URL
+const hasValidConfig = supabaseUrl.includes("supabase.co") && supabaseKey !== "placeholder-key";
+const supabase = hasValidConfig ? createClient(supabaseUrl, supabaseKey) : null;
+
+let inMemoryStore = {};
+let dbEnabled = !!supabase;
+
+const initializeStore = async () => {
+  if (!dbEnabled) {
+    console.warn("⚠️ Supabase credentials not found in .env, running purely in memory.");
+    return;
   }
 
-  if (!fs.existsSync(STORE_FILE)) {
-    fs.writeFileSync(STORE_FILE, JSON.stringify({}, null, 2));
-  }
-};
-
-const safeParse = (content) => {
   try {
-    const parsed = JSON.parse(content);
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch {
-    return {};
+    const { data, error } = await supabase.from('sport_states').select('*');
+    if (error) throw error;
+    
+    if (data && data.length > 0) {
+      data.forEach(row => {
+        inMemoryStore[row.sport] = Array.isArray(row.data) ? row.data : [];
+      });
+      console.log("✅ Supabase DB Connected. Synced sports:", Object.keys(inMemoryStore));
+    } else {
+      console.log("✅ Supabase DB Connected. (Empty/Wiped DB - Starting fresh)");
+    }
+  } catch (err) {
+    console.error("❌ Supabase initialization failed, falling back to memory layer:", err.message);
+    dbEnabled = false;
   }
-};
-
-const readStore = () => {
-  ensureStoreFile();
-  const raw = fs.readFileSync(STORE_FILE, "utf-8");
-  return safeParse(raw);
-};
-
-const writeStore = (store) => {
-  ensureStoreFile();
-  fs.writeFileSync(STORE_FILE, JSON.stringify(store, null, 2));
 };
 
 const getInitialSportMatches = (sport, seedData) => {
-  const store = readStore();
-
-  if (Array.isArray(store[sport])) {
-    return JSON.parse(JSON.stringify(store[sport]));
+  // If the DB already had records, return a deep copy to prevent mutation bugs
+  if (Array.isArray(inMemoryStore[sport]) && inMemoryStore[sport].length > 0) {
+    return JSON.parse(JSON.stringify(inMemoryStore[sport]));
   }
-
-  store[sport] = Array.isArray(seedData) ? JSON.parse(JSON.stringify(seedData)) : [];
-  writeStore(store);
-  return store[sport];
+  
+  // The user requested a completely fresh wipe, ignoring seed files!
+  inMemoryStore[sport] = [];
+  return [];
 };
 
 const saveSportMatches = (sport, matches) => {
-  const store = readStore();
-  store[sport] = Array.isArray(matches) ? matches : [];
-  writeStore(store);
+  inMemoryStore[sport] = matches;
+  if (!dbEnabled) return;
+  
+  // Asynchronously flush the state to Supabase JSONB col
+  supabase
+    .from('sport_states')
+    .upsert({ sport, data: matches, updated_at: new Date() })
+    .then(({ error }) => {
+      if (error) console.error(`Failed to save ${sport} to Supabase:`, error);
+    });
 };
 
 module.exports = {
+  initializeStore,
   getInitialSportMatches,
   saveSportMatches,
 };

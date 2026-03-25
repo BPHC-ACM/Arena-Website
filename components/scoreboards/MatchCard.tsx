@@ -1,0 +1,71 @@
+"use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState } from "react";
+import type { SportId } from "@/app/lib/sports";
+import { ACCENT } from "@/app/lib/sports";
+import { isInProgress } from "@/app/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { CricketCard } from "./cards/CricketCard";
+import { BasketballCard } from "./cards/BasketballCard";
+import { FootballCard } from "./cards/FootballCard";
+import { TennisCard } from "./cards/TennisCard";
+import { BadmintonCard } from "./cards/BadmintonCard";
+import { VolleyballCard } from "./cards/VolleyballCard";
+import { KabaddiCard } from "./cards/KabaddiCard";
+import { FrisbeeCard } from "./cards/FrisbeeCard";
+import { generateShareCard } from "./ShareCard";
+import { Share2 } from "lucide-react";
+
+interface Props {
+  sport: SportId;
+  match: any;
+}
+
+export function MatchCard({ sport, match }: Props) {
+  const live = isInProgress(match);
+  const [sharing, setSharing] = useState(false);
+
+  const handleShare = () => {
+    setSharing(true);
+    setTimeout(() => { generateShareCard(sport, match); setSharing(false); }, 50);
+  };
+
+  return (
+    <div
+      className="rounded-xl bg-[#111] transition-all duration-200"
+      style={{
+        border: live ? `1px solid ${ACCENT}33` : "1px solid #1e1e1e",
+        borderLeft: live ? `3px solid ${ACCENT}` : "3px solid #1e1e1e",
+      }}
+    >
+      {live && (
+        <div className="flex items-center gap-2 px-5 pt-4">
+          <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: ACCENT }} />
+          <Badge variant="outline" className="text-[11px] font-bold tracking-widest border-current py-0 px-2"
+            style={{ color: ACCENT, borderColor: `${ACCENT}44` }}>
+            LIVE
+          </Badge>
+        </div>
+      )}
+
+      <div className="p-5 md:p-6">
+        {sport === "cricket"    && <CricketCard match={match as any} />}
+        {sport === "basketball" && <BasketballCard match={match as any} />}
+        {sport === "football"   && <FootballCard match={match as any} />}
+        {sport === "tennis"     && <TennisCard match={match as any} />}
+        {sport === "badminton"  && <BadmintonCard match={match as any} />}
+        {sport === "volleyball" && <VolleyballCard match={match as any} />}
+        {sport === "kabaddi"    && <KabaddiCard match={match as any} />}
+        {sport === "frisbee"    && <FrisbeeCard match={match as any} />}
+
+        <div className="mt-5 pt-3 border-t border-[#181818] flex justify-end">
+          <button onClick={handleShare} disabled={sharing}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-[13px] text-[#555] hover:text-[#999] transition-colors disabled:opacity-40">
+            <Share2 className="w-3.5 h-3.5 flex-shrink-0" />
+            {sharing ? "Generating…" : "Share"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
