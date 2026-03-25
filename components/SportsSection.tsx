@@ -1,6 +1,7 @@
 "use client";
 
 const marqueeVector = '/sports-vectors/sports-vector.svg'
+const OVERLAP_PX = 50 
 
 const bannerSports = ['TENNIS', 'BADMINTON', 'POOL', 'FOOTBALL', 'VOLLEYBALL', 'SWIMMING', 'HOCKEY', 'BASKETBALL', 'FRISBEE']
 const bannerRepeats = 14
@@ -13,7 +14,7 @@ const BannerLine = ({ reverse = false }: { reverse?: boolean }) => (
       color: sportsAccentRed,
       fontFamily: "'gangofthree', Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif",
       animation: reverse ? 'sports-marquee-reverse 60s linear infinite' : 'sports-marquee 60s linear infinite',
-      WebkitTransform: 'translateZ(0)',
+      WebkitTransform: 'translate3d(0, 0, 0)', 
     }}
   >
     {Array.from({ length: bannerRepeats }).map((_, repeatIdx) => (
@@ -36,81 +37,71 @@ const BannerLine = ({ reverse = false }: { reverse?: boolean }) => (
 )
 
 export const SportsSection = () => {
+  const repeatingImages = Array.from({ length: 8 });
+
   return (
     <>
       <style>{`
         @keyframes sports-marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-50%, 0, 0); }
         }
         @keyframes sports-marquee-reverse {
-          0% { transform: translateX(-50%); }
-          100% { transform: translateX(0); }
+          0% { transform: translate3d(-50%, 0, 0); }
+          100% { transform: translate3d(0, 0, 0); }
         }
         @keyframes sports-vector-marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(calc(-170vw + var(--sports-vector-overlap))); }
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-50%, 0, 0); }
         }
       `}</style>
-      <section
-        className="grid h-[740px] w-full select-none overflow-hidden bg-black grid-rows-[22px_1fr_22px] min-[1280px]:[--sports-layout-scale:1.46] min-[1280px]:[--sports-track-pad-top:154px] min-[1280px]:[--sports-track-pad-bottom:84px] min-[1600px]:[--sports-layout-scale:1.56] min-[1600px]:[--sports-track-pad-top:180px] min-[1600px]:[--sports-track-pad-bottom:100px] max-[900px]:h-[600px] max-[900px]:grid-rows-[20px_1fr_20px] max-[900px]:[--sports-layout-scale:1.14] max-[900px]:[--sports-track-pad-top:95px] max-[900px]:[--sports-track-pad-bottom:55px] max-[600px]:h-[460px] max-[600px]:grid-rows-[18px_1fr_18px] max-[600px]:[--sports-layout-scale:0.87] max-[600px]:[--sports-track-pad-top:66px] max-[600px]:[--sports-track-pad-bottom:36px]"
-        style={{
-          ['--sports-layout-scale' as string]: '1.3',
-          ['--sports-track-pad-top' as string]: '130px',
-          ['--sports-track-pad-bottom' as string]: '70px',
-          ['--sports-vector-overlap' as string]: '50px',
-        }}
-      >
-      <div className="overflow-hidden bg-[#B8C448]">
-        <BannerLine />
-      </div>
+      <section className="grid h-[740px] w-full select-none overflow-hidden bg-black grid-rows-[auto_1fr_auto] max-[900px]:h-[600px] max-[600px]:h-[500px]">
+        <div className="overflow-hidden bg-[#B8C448] py-1">
+          <BannerLine />
+        </div>
 
-      <div className="relative box-border flex h-[696px] items-center overflow-hidden bg-[linear-gradient(180deg,#050505_0%,#000_50%,#050505_100%)] pt-[var(--sports-track-pad-top)] pb-[var(--sports-track-pad-bottom)] max-[900px]:h-[560px] max-[600px]:h-[424px]">
+        <div className="relative flex items-center justify-center overflow-hidden bg-black">
+          
+          {/* Marquee Container */}
+          <div 
+            className="pointer-events-none absolute flex h-full items-center will-change-transform"
+            style={{ 
+              animation: 'sports-vector-marquee 60s linear infinite',
+              width: 'max-content' 
+            }}
+          >
+            {repeatingImages.map((_, i) => (
+              <img
+                key={`img-vector-${i}`}
+                className="h-[85%] w-auto max-w-none shrink-0 filter-[brightness(1.04)]"
+                style={{ marginRight: `-${OVERLAP_PX}px` }}
+                src={marqueeVector}
+                alt="sports vector marquee"
+                draggable={false}
+                loading={i < 3 ? "eager" : "lazy"}
+                aria-hidden="true"
+              />
+            ))}
+          </div>
 
-        <div className="pointer-events-none absolute top-1/2 left-0 w-full -translate-y-1/2">
-          <div className="flex w-max" style={{ animation: 'sports-vector-marquee 45s linear infinite', WebkitTransform: 'translateZ(0)' }}>
-            <img
-              className="h-[calc(382.5px*var(--sports-layout-scale))] w-[170vw] shrink-0 select-none object-cover object-center filter-[brightness(1.04)]"
-              src={marqueeVector}
-              alt="sports vector marquee"
-              draggable={false}
-              aria-hidden="true"
-            />
-            <img
-              className="h-[calc(382.5px*var(--sports-layout-scale))] w-[170vw] shrink-0 select-none object-cover object-center filter-[brightness(1.04)] ml-[calc(var(--sports-vector-overlap)*-1)]"
-              src={marqueeVector}
-              alt="sports vector marquee"
-              draggable={false}
-              aria-hidden="true"
-            />
-            <img
-              className="h-[calc(382.5px*var(--sports-layout-scale))] w-[170vw] shrink-0 select-none object-cover object-center filter-[brightness(1.04)] ml-[calc(var(--sports-vector-overlap)*-1)]"
-              src={marqueeVector}
-              alt="sports vector marquee"
-              draggable={false}
-              aria-hidden="true"
-            />
+          {/* Central Label */}
+          <div
+            className="relative z-20 flex h-[120px] w-[300px] items-center justify-center rounded-2xl backdrop-blur-sm max-[900px]:h-[100px] max-[900px]:w-[280px] max-[600px]:h-[80px] max-[600px]:w-[240px]"
+            style={{ backgroundColor: 'rgba(209, 25, 22, 0.4)', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}
+            aria-hidden="true"
+          >
+            <span
+              className="block translate-y-[0.04em] text-[4rem] leading-none tracking-[0.015em] text-[#f4f0df] max-[900px]:text-[3.2rem] max-[600px]:text-[2.5rem]"
+              style={{ fontFamily: "'tillburg', Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif" }}
+            >
+              SPORTS
+            </span>
           </div>
         </div>
 
-        <div
-          className="pointer-events-none absolute top-1/2 left-1/2 z-20 flex h-[clamp(108px,10.5vw,162px)] w-[clamp(328.32px,31.68vw,489.6px)] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-2xl shadow-[0_16px_44px_rgba(0,0,0,0.58)] backdrop-blur-[1px] max-[900px]:h-[clamp(96px,13.5vw,138px)] max-[900px]:w-[clamp(288px,44.64vw,396.48px)] max-[600px]:h-[clamp(72px,19.5vw,114px)] max-[600px]:w-[clamp(216px,67.68vw,316.8px)]"
-          style={{ backgroundColor: 'rgba(209, 25, 22, 0.4)' }}
-          aria-hidden="true"
-        >
-          <span
-            className="block translate-y-[0.04em] text-[clamp(4.03rem,7.67vw,7.41rem)] leading-[0.9] uppercase tracking-[0.015em] text-[#f4f0df] max-[900px]:text-[clamp(3.38rem,9.62vw,5.72rem)] max-[600px]:text-[clamp(2.47rem,11.96vw,4.03rem)]"
-            style={{ fontFamily: "'tillburg', Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif" }}
-          >
-            SPORTS
-          </span>
+        <div className="overflow-hidden bg-[#B8C448] py-1">
+          <BannerLine reverse />
         </div>
-
-      </div>
-
-      <div className="overflow-hidden bg-[#B8C448]">
-        <BannerLine reverse />
-      </div>
       </section>
     </>
   )
