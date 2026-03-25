@@ -10,7 +10,7 @@ const quickLinks = [
 
 const contactItems = [
   { icon: "phone", text: "+91 99459 23134" },
-  { icon: "mail", text: "arena@hyderabad.bits-pilani.ac.in" },
+  { icon: "mail", text: "ARENA@HYDERABAD.BITS-PILANI.AC.IN" },
   { icon: "location", text: "BITS PILANI, HYDERABAD CAMPUS" },
 ];
 

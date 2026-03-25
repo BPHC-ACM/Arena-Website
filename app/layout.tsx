@@ -15,8 +15,34 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Arena 2026',
-  description: 'Official website for Arena, the annual sports fest.',
+  title: 'Arena 2026 | South India\'s Largest Sports Festival',
+  description: 'Official website for Arena 2026, the annual sports fest of BITS Pilani Hyderabad Campus.',
+  icons: {
+    icon: '/arena%20logo_%202.png',
+    apple: '/arena%20logo_%202.png',
+  },
+  openGraph: {
+    title: 'Arena 2026 | BITS Pilani Hyderabad',
+    description: 'Join us at Arena 2026, South India\'s Largest Sports Festival at BITS Pilani Hyderabad Campus.',
+    url: 'https://arena-bitsh.com',
+    siteName: 'Arena 2026',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Arena 2026 Logo Preview',
+      },
+    ],
+    locale: 'en_IN',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Arena 2026 | BITS Pilani Hyderabad',
+    description: 'South India\'s Largest Sports Festival.',
+    images: ['/og-image.png'],
+  },
 };
 
 export default function RootLayout({

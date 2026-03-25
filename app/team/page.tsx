@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { allMembers } from './data';
 import TeamMemberCard from '@/components/TeamMemberCard';
+import Footer from '@/components/Footer';
 
 const subtitleMap: Record<string, string> = {
   'core': 'Core Council',
@@ -32,10 +33,12 @@ export default function TeamPage() {
       `}} />
       
       {/* Ticker */}
-      <div className="w-full bg-[#2d4a1e] text-[#86efac] text-[10px] tracking-[.15em] uppercase overflow-hidden py-2 whitespace-nowrap mb-[40px] border-b border-white/5 shadow-md flex">
-         <div className="ticker-inner">
-            {[...Array(10)].map((_, i) => (
-              <span key={i} className="pr-4">SOUTH INDIA'S LARGEST SPORTS FESTIVAL • ARENA'26 • BITS PILANI HYDERABAD CAMPUS •</span>
+      <div className="w-full bg-[#2d4a1e] text-[#86efac] text-[12px] md:text-[14px] tracking-[.1em] overflow-hidden py-1.5 whitespace-nowrap border-b border-[#86efac]/20 shadow-md flex relative z-10" style={{ fontFamily: "'gangofthree', sans-serif" }}>
+         <div className="ticker-inner flex items-center">
+            {[...Array(15)].map((_, i) => (
+              <span key={i} className="pr-4 flex items-center">
+                SOUTH INDIA'S LARGEST SPORTS FESTIVAL <span className="mx-2 text-[10px] text-[#A3E635]">●</span>
+              </span>
             ))}
          </div>
       </div>
@@ -106,6 +109,8 @@ export default function TeamPage() {
         <div className="flex-1 bg-[#a3e635]" />
         <div className="flex-1 bg-[#7E9678]" />
       </div>
+
+      <Footer />
     </main>
   );
 }

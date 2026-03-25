@@ -1,5 +1,6 @@
 'use client';
 import { motion } from 'framer-motion';
+import Footer from '@/components/Footer';
 
 export default function SponsorsPage() {
   return (
@@ -84,6 +85,8 @@ export default function SponsorsPage() {
         </div>
 
       </div>
+
+      <Footer />
     </main>
   );
 }

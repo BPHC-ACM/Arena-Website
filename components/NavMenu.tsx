@@ -108,7 +108,7 @@ export default function NavMenu({ isOpen, onClose }: NavMenuProps) {
               className="mt-16 text-[#7E9678] text-sm md:text-base uppercase tracking-widest text-center"
               style={{ fontFamily: "'GangOfThree'" }}
             >
-              ARENA&apos;26 • SHADOWS RISING
+              <span>ARENA&apos;26</span> <span style={{ fontFamily: "Arial, sans-serif" }}>|</span> <span>SHADOWS RISING</span>
             </motion.div>
           </motion.div>
         </motion.div>
