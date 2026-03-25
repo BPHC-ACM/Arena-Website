@@ -170,6 +170,180 @@ export interface FrisbeeMatch extends BaseMatch {
   possession?: string;
 }
 
+// ── Carrom ────────────────────────────────────────────────────────────────────
+export interface CarromMatch extends BaseMatch {
+  player1: string;
+  player2: string;
+  scorePlayer1: number;
+  scorePlayer2: number;
+  currentBoard: number;
+  bestOf?: number;
+  boardsPlayer1: number[];
+  boardsPlayer2: number[];
+  striker?: 1 | 2;
+}
+
+// ── Chess ─────────────────────────────────────────────────────────────────────
+export interface ChessMatch extends BaseMatch {
+  player1: string;
+  player2: string;
+  timePlayer1: string;
+  timePlayer2: string;
+  movesPlayer1: number;
+  movesPlayer2: number;
+  currentTurn?: 1 | 2;
+  timeControl?: string;
+  result?: string;
+}
+
+// ── Hockey ────────────────────────────────────────────────────────────────────
+export interface HockeyMatch extends BaseMatch {
+  teamA: string;
+  teamB: string;
+  scoreA: number;
+  scoreB: number;
+  currentPeriod: number;
+  matchTime: string;
+  periodScoresA: number[];
+  periodScoresB: number[];
+  penaltiesA?: number;
+  penaltiesB?: number;
+}
+
+// ── Kho Kho ──────────────────────────────────────────────────────────────────
+export interface KhoKhoMatch extends BaseMatch {
+  teamA: string;
+  teamB: string;
+  scoreA: number;
+  scoreB: number;
+  currentInning: number;
+  chasingTeam?: 'A' | 'B';
+  defendersRemaining?: number;
+  timeRemaining: string;
+  inningsScoreA: number[];
+  inningsScoreB: number[];
+}
+
+// ── Powerlifting ─────────────────────────────────────────────────────────────
+export interface PowerliftingMatch extends BaseMatch {
+  athlete1: string;
+  athlete2: string;
+  squatAttempt1Athlete1?: number;
+  squatAttempt2Athlete1?: number;
+  squatAttempt3Athlete1?: number;
+  benchAttempt1Athlete1?: number;
+  benchAttempt2Athlete1?: number;
+  benchAttempt3Athlete1?: number;
+  deadliftAttempt1Athlete1?: number;
+  deadliftAttempt2Athlete1?: number;
+  deadliftAttempt3Athlete1?: number;
+  squatAttempt1Athlete2?: number;
+  squatAttempt2Athlete2?: number;
+  squatAttempt3Athlete2?: number;
+  benchAttempt1Athlete2?: number;
+  benchAttempt2Athlete2?: number;
+  benchAttempt3Athlete2?: number;
+  deadliftAttempt1Athlete2?: number;
+  deadliftAttempt2Athlete2?: number;
+  deadliftAttempt3Athlete2?: number;
+  totalAthlete1: number;
+  totalAthlete2: number;
+  currentLift?: 'squat' | 'bench' | 'deadlift';
+  weightClass?: string;
+}
+
+// ── Skating ──────────────────────────────────────────────────────────────────
+export interface SkatingMatch extends BaseMatch {
+  athlete1: string;
+  athlete2: string;
+  time1?: string;
+  time2?: string;
+  distance?: string;
+  eventType?: 'speed' | 'artistic';
+  scoreAthlete1?: number;
+  scoreAthlete2?: number;
+}
+
+// ── 8 Ball Pool ──────────────────────────────────────────────────────────────
+export interface EightBallMatch extends BaseMatch {
+  player1: string;
+  player2: string;
+  framesPlayer1: number;
+  framesPlayer2: number;
+  currentFrame: number;
+  bestOf?: number;
+  ballsRemainingPlayer1?: number;
+  ballsRemainingPlayer2?: number;
+  onBreak?: 1 | 2;
+}
+
+// ── Snooker ──────────────────────────────────────────────────────────────────
+export interface SnookerMatch extends BaseMatch {
+  player1: string;
+  player2: string;
+  framesPlayer1: number;
+  framesPlayer2: number;
+  currentFrame: number;
+  currentScorePlayer1: number;
+  currentScorePlayer2: number;
+  bestOf?: number;
+  onTable?: 1 | 2;
+  remainingPoints?: number;
+}
+
+// ── Squash ───────────────────────────────────────────────────────────────────
+export interface SquashMatch extends BaseMatch {
+  player1: string;
+  player2: string;
+  gamesPlayer1: number[];
+  gamesPlayer2: number[];
+  currentGame: number;
+  currentPointsPlayer1: number;
+  currentPointsPlayer2: number;
+  server?: 1 | 2;
+  bestOf?: number;
+}
+
+// ── Swimming ─────────────────────────────────────────────────────────────────
+export interface SwimmingMatch extends BaseMatch {
+  swimmer1: string;
+  swimmer2: string;
+  time1?: string;
+  time2?: string;
+  distance?: string;
+  stroke?: string;
+  lane1?: number;
+  lane2?: number;
+}
+
+// ── Table Tennis ─────────────────────────────────────────────────────────────
+export interface TableTennisMatch extends BaseMatch {
+  player1: string;
+  player2: string;
+  gamesPlayer1: number[];
+  gamesPlayer2: number[];
+  currentGame: number;
+  currentPointsPlayer1: number;
+  currentPointsPlayer2: number;
+  server?: 1 | 2;
+  bestOf?: number;
+}
+
+// ── Throwball ────────────────────────────────────────────────────────────────
+export interface ThrowballMatch extends BaseMatch {
+  teamA: string;
+  teamB: string;
+  setsTeamA: number[];
+  setsTeamB: number[];
+  currentSet: number;
+  currentPointsTeamA: number;
+  currentPointsTeamB: number;
+  setWinsA: number;
+  setWinsB: number;
+  bestOf?: number;
+  servingTeam?: 'A' | 'B';
+}
+
 // ── Union ─────────────────────────────────────────────────────────────────────
 export type AnyMatch =
   | CricketMatch
@@ -179,6 +353,18 @@ export type AnyMatch =
   | BadmintonMatch
   | VolleyballMatch
   | KabaddiMatch
-  | FrisbeeMatch;
+  | FrisbeeMatch
+  | CarromMatch
+  | ChessMatch
+  | HockeyMatch
+  | KhoKhoMatch
+  | PowerliftingMatch
+  | SkatingMatch
+  | EightBallMatch
+  | SnookerMatch
+  | SquashMatch
+  | SwimmingMatch
+  | TableTennisMatch
+  | ThrowballMatch;
 
 export type MatchData = Record<string, any>;

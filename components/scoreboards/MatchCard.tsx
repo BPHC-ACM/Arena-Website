@@ -13,6 +13,18 @@ import { BadmintonCard } from "./cards/BadmintonCard";
 import { VolleyballCard } from "./cards/VolleyballCard";
 import { KabaddiCard } from "./cards/KabaddiCard";
 import { FrisbeeCard } from "./cards/FrisbeeCard";
+import { CarromCard } from "./cards/CarromCard";
+import { ChessCard } from "./cards/ChessCard";
+import { HockeyCard } from "./cards/HockeyCard";
+import { KhoKhoCard } from "./cards/KhoKhoCard";
+import { PowerliftingCard } from "./cards/PowerliftingCard";
+import { SkatingCard } from "./cards/SkatingCard";
+import { EightBallCard } from "./cards/EightBallCard";
+import { SnookerCard } from "./cards/SnookerCard";
+import { SquashCard } from "./cards/SquashCard";
+import { SwimmingCard } from "./cards/SwimmingCard";
+import { TableTennisCard } from "./cards/TableTennisCard";
+import { ThrowballCard } from "./cards/ThrowballCard";
 import { generateShareCard } from "./ShareCard";
 import { Share2 } from "lucide-react";
 
@@ -49,14 +61,26 @@ export function MatchCard({ sport, match }: Props) {
       )}
 
       <div className="p-5 md:p-6">
-        {sport === "cricket"    && <CricketCard match={match as any} />}
-        {sport === "basketball" && <BasketballCard match={match as any} />}
-        {sport === "football"   && <FootballCard match={match as any} />}
-        {sport === "tennis"     && <TennisCard match={match as any} />}
-        {sport === "badminton"  && <BadmintonCard match={match as any} />}
-        {sport === "volleyball" && <VolleyballCard match={match as any} />}
-        {sport === "kabaddi"    && <KabaddiCard match={match as any} />}
-        {sport === "frisbee"    && <FrisbeeCard match={match as any} />}
+        {sport === "cricket"      && <CricketCard match={match as any} />}
+        {sport === "basketball"   && <BasketballCard match={match as any} />}
+        {sport === "football"     && <FootballCard match={match as any} />}
+        {sport === "tennis"       && <TennisCard match={match as any} />}
+        {sport === "badminton"    && <BadmintonCard match={match as any} />}
+        {sport === "volleyball"   && <VolleyballCard match={match as any} />}
+        {sport === "kabaddi"      && <KabaddiCard match={match as any} />}
+        {sport === "frisbee"      && <FrisbeeCard match={match as any} />}
+        {sport === "carrom"       && <CarromCard match={match as any} />}
+        {sport === "chess"        && <ChessCard match={match as any} />}
+        {sport === "hockey"       && <HockeyCard match={match as any} />}
+        {sport === "khokho"       && <KhoKhoCard match={match as any} />}
+        {sport === "powerlifting" && <PowerliftingCard match={match as any} />}
+        {sport === "skating"      && <SkatingCard match={match as any} />}
+        {sport === "8ball"        && <EightBallCard match={match as any} />}
+        {sport === "snooker"      && <SnookerCard match={match as any} />}
+        {sport === "squash"       && <SquashCard match={match as any} />}
+        {sport === "swimming"     && <SwimmingCard match={match as any} />}
+        {sport === "tabletennis"  && <TableTennisCard match={match as any} />}
+        {sport === "throwball"    && <ThrowballCard match={match as any} />}
 
         <div className="mt-5 pt-3 border-t border-[#181818] flex justify-end">
           <button onClick={handleShare} disabled={sharing}

@@ -57,6 +57,18 @@ initializeStore().then(() => {
   const { getVolleyballMatches } = require("./models/volleyballModel");
   const { getKabaddiMatches } = require("./models/kabaddiModel");
   const { getFrisbeeMatches } = require("./models/frisbeeModel");
+  const { getCarromMatches } = require("./models/carromModel");
+  const { getChessMatches } = require("./models/chessModel");
+  const { getHockeyMatches } = require("./models/hockeyModel");
+  const { getKhoKhoMatches } = require("./models/khokhoModel");
+  const { getPowerliftingMatches } = require("./models/powerliftingModel");
+  const { getSkatingMatches } = require("./models/skatingModel");
+  const { getEightBallMatches } = require("./models/8ballModel");
+  const { getSnookerMatches } = require("./models/snookerModel");
+  const { getSquashMatches } = require("./models/squashModel");
+  const { getSwimmingMatches } = require("./models/swimmingModel");
+  const { getTableTennisMatches } = require("./models/tabletennisModel");
+  const { getThrowballMatches } = require("./models/throwballModel");
 
   const cricketRoutes = require("./routes/cricket");
   const basketballRoutes = require("./routes/basketball");
@@ -66,6 +78,18 @@ initializeStore().then(() => {
   const volleyballRoutes = require("./routes/volleyball");
   const kabaddiRoutes = require("./routes/kabaddi");
   const frisbeeRoutes = require("./routes/frisbee");
+  const carromRoutes = require("./routes/carrom");
+  const chessRoutes = require("./routes/chess");
+  const hockeyRoutes = require("./routes/hockey");
+  const khokhoRoutes = require("./routes/khokho");
+  const powerliftingRoutes = require("./routes/powerlifting");
+  const skatingRoutes = require("./routes/skating");
+  const eightballRoutes = require("./routes/8ball");
+  const snookerRoutes = require("./routes/snooker");
+  const squashRoutes = require("./routes/squash");
+  const swimmingRoutes = require("./routes/swimming");
+  const tabletennisRoutes = require("./routes/tabletennis");
+  const throwballRoutes = require("./routes/throwball");
 
   const emitAllSnapshots = () => {
     socketHandler.emitCricketUpdate(getCricketMatches());
@@ -76,6 +100,18 @@ initializeStore().then(() => {
     socketHandler.emitVolleyballUpdate(getVolleyballMatches());
     socketHandler.emitKabaddiUpdate(getKabaddiMatches());
     socketHandler.emitFrisbeeUpdate(getFrisbeeMatches());
+    socketHandler.emitCarromUpdate(getCarromMatches());
+    socketHandler.emitChessUpdate(getChessMatches());
+    socketHandler.emitHockeyUpdate(getHockeyMatches());
+    socketHandler.emitKhoKhoUpdate(getKhoKhoMatches());
+    socketHandler.emitPowerliftingUpdate(getPowerliftingMatches());
+    socketHandler.emitSkatingUpdate(getSkatingMatches());
+    socketHandler.emitEightBallUpdate(getEightBallMatches());
+    socketHandler.emitSnookerUpdate(getSnookerMatches());
+    socketHandler.emitSquashUpdate(getSquashMatches());
+    socketHandler.emitSwimmingUpdate(getSwimmingMatches());
+    socketHandler.emitTableTennisUpdate(getTableTennisMatches());
+    socketHandler.emitThrowballUpdate(getThrowballMatches());
   };
 
   const startLiveTimers = () => {
@@ -170,6 +206,18 @@ initializeStore().then(() => {
   app.use("/api/volleyball", volleyballRoutes);
   app.use("/api/kabaddi", kabaddiRoutes);
   app.use("/api/frisbee", frisbeeRoutes);
+  app.use("/api/carrom", carromRoutes);
+  app.use("/api/chess", chessRoutes);
+  app.use("/api/hockey", hockeyRoutes);
+  app.use("/api/khokho", khokhoRoutes);
+  app.use("/api/powerlifting", powerliftingRoutes);
+  app.use("/api/skating", skatingRoutes);
+  app.use("/api/8ball", eightballRoutes);
+  app.use("/api/snooker", snookerRoutes);
+  app.use("/api/squash", squashRoutes);
+  app.use("/api/swimming", swimmingRoutes);
+  app.use("/api/tabletennis", tabletennisRoutes);
+  app.use("/api/throwball", throwballRoutes);
 
   app.get("/", (req, res) => {
     res.json({
@@ -183,6 +231,18 @@ initializeStore().then(() => {
         "volleyball",
         "kabaddi",
         "frisbee",
+        "carrom",
+        "chess",
+        "hockey",
+        "khokho",
+        "powerlifting",
+        "skating",
+        "8ball",
+        "snooker",
+        "squash",
+        "swimming",
+        "tabletennis",
+        "throwball",
       ],
       endpoints: {
         GET: "/api/{sport}",

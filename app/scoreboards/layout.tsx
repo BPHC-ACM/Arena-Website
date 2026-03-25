@@ -27,7 +27,7 @@ export default function ScoreboardsLayout({ children }: { children: React.ReactN
       >
         <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
         <aside 
-          className={`relative flex w-64 max-w-[80vw] flex-col bg-[#0d0d0d] border-r border-[#1c1c1c] h-full shadow-2xl transition-transform duration-300 ease-out ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
+          className={`relative flex w-64 max-w-[80vw] flex-col bg-[#0d0d0d] border-r border-[#1c1c1c] h-full min-h-0 shadow-2xl transition-transform duration-300 ease-out ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >
           <div className="px-5 py-5 border-b border-[#181818] flex justify-between items-start">
             <div>
@@ -40,7 +40,7 @@ export default function ScoreboardsLayout({ children }: { children: React.ReactN
               <X className="w-5 h-5 flex-shrink-0" />
             </button>
           </div>
-          <nav className="flex-1 overflow-y-auto p-2.5">
+          <nav className="flex-1 min-h-0 overflow-y-auto p-2.5">
             <SportNavItems onClick={() => setMobileMenuOpen(false)} />
           </nav>
           <div className="p-3 border-t border-[#181818]">
@@ -53,14 +53,14 @@ export default function ScoreboardsLayout({ children }: { children: React.ReactN
         </aside>
       </div>
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-56 flex-shrink-0 flex-col border-r border-[#1c1c1c] bg-[#0d0d0d]">
+      <aside className="hidden md:flex w-56 flex-shrink-0 flex-col border-r border-[#1c1c1c] bg-[#0d0d0d] h-full min-h-0">
         <div className="px-5 py-5 border-b border-[#181818]">
           <Link href="/" className="flex items-center gap-2 text-[#555] text-sm hover:text-[#888] transition-colors">
             <ChevronLeft className="w-4 h-4 mr-1" />Home
           </Link>
           <p className="mt-3 text-[11px] font-bold tracking-[0.16em] uppercase" style={{ color: ACCENT }}>Scoreboards</p>
         </div>
-        <nav className="flex-1 overflow-y-auto p-2.5">
+        <nav className="flex-1 min-h-0 overflow-y-auto p-2.5">
           <SportNavItems />
         </nav>
         <div className="p-3 border-t border-[#181818]">
