@@ -2,11 +2,11 @@ import type { KhoKhoMatch } from "@/app/lib/types";
 import { cn } from "@/app/lib/utils";
 
 export function KhoKhoCard({ match }: { match: KhoKhoMatch }) {
-  const { teamA, teamB, scoreA, scoreB, currentInning, chasingTeam, defendersRemaining, timeRemaining, inningsScoreA, inningsScoreB, status } = match;
+  const { teamA, teamB, scoreA, scoreB, currentInning, chasingTeam, defendersRemaining, timeRemaining, inning1ScoreA, inning2ScoreA, inning1ScoreB, inning2ScoreB, status } = match;
 
   const rows = [
-    { name: teamA, score: scoreA, innings: inningsScoreA, isChasing: chasingTeam === 'A' },
-    { name: teamB, score: scoreB, innings: inningsScoreB, isChasing: chasingTeam === 'B' },
+    { name: teamA, score: scoreA, innings: [inning1ScoreA ?? 0, inning2ScoreA ?? 0], isChasing: chasingTeam === 'A' },
+    { name: teamB, score: scoreB, innings: [inning1ScoreB ?? 0, inning2ScoreB ?? 0], isChasing: chasingTeam === 'B' },
   ];
 
   return (
@@ -31,7 +31,7 @@ export function KhoKhoCard({ match }: { match: KhoKhoMatch }) {
               <span className={cn("font-semibold text-sm truncate", i === 0 ? "text-white" : "text-[#aaa]")}>{t.name}</span>
             </div>
             <div className="flex items-center gap-2">
-              {t.innings?.map((s, j) => (
+              {t.innings.map((s, j) => (
                 <span key={j} className={cn("font-mono text-base min-w-[20px] text-center",
                   j === currentInning - 1 ? "text-white font-bold" : "text-[#333]")}>{s}</span>
               ))}

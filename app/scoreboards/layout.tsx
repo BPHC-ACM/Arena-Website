@@ -107,8 +107,13 @@ export default function ScoreboardsLayout({
         </div>
       </aside>
 
-      <div className='flex-1 flex flex-col min-h-0 overflow-hidden'>
-        <main className='flex-1 overflow-y-auto min-h-0'>{children}</main>
+      <div className='flex-1 flex flex-col min-h-0 overflow-hidden relative'>
+        <main className='flex-1 overflow-y-auto min-h-0 flex flex-col'>
+          <div className='flex-1 flex flex-col'>{children}</div>
+          <footer className='text-[13px] text-center font-bold tracking-[0.16em] uppercase pb-6 mt-auto text-[#666]'>
+            BUILT BY ACM
+          </footer>
+        </main>
       </div>
     </div>
   );
@@ -129,8 +134,8 @@ function SportNavItems({ onClick }: { onClick?: () => void }) {
   }, [favourites, isLoaded]);
 
   const { favouriteSports, otherSports } = useMemo(() => {
-    const favs = sortedSports.filter(s => favourites.includes(s.id));
-    const nonFavs = sortedSports.filter(s => !favourites.includes(s.id));
+    const favs = sortedSports.filter((s) => favourites.includes(s.id));
+    const nonFavs = sortedSports.filter((s) => !favourites.includes(s.id));
     return { favouriteSports: favs, otherSports: nonFavs };
   }, [sortedSports, favourites]);
 
@@ -167,14 +172,14 @@ function SportNavItems({ onClick }: { onClick?: () => void }) {
   );
 }
 
-function SportNavLink({ 
-  sport, 
-  active, 
-  onClick 
-}: { 
-  sport: typeof SPORTS[0]; 
-  active: boolean; 
-  onClick?: () => void 
+function SportNavLink({
+  sport,
+  active,
+  onClick,
+}: {
+  sport: (typeof SPORTS)[0];
+  active: boolean;
+  onClick?: () => void;
 }) {
   return (
     <Link
@@ -199,7 +204,7 @@ function SportNavLink({
       <i
         className={`${sport.icon} text-base w-4 text-center flex-shrink-0`}
       ></i>
-      <span className="truncate">{sport.name}</span>
+      <span className='truncate'>{sport.name}</span>
     </Link>
   );
 }

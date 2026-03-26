@@ -3,10 +3,11 @@
 import { useMatchStream } from '@/app/lib/useMatchStream';
 import { getSport, ACCENT, type SportId } from '@/app/lib/sports';
 import { MatchCard } from '@/components/scoreboards/MatchCard';
-import { AlertTriangle, Loader2, Star } from 'lucide-react';
+import { AlertTriangle, Star } from 'lucide-react';
 import Image from 'next/image';
 import { useFavourites } from '@/app/lib/useFavourites';
 import { cn } from '@/app/lib/utils';
+import { SkeletonMatchCard } from '@/components/scoreboards/SkeletonMatchCard';
 
 export function SportPageClient({ sport }: { sport: SportId }) {
   const { matches, loading, error } = useMatchStream(sport);
@@ -31,7 +32,7 @@ export function SportPageClient({ sport }: { sport: SportId }) {
       </div>
 
       {/* Header */}
-      <div className='relative z-10 flex items-center gap-4 mb-8'>
+      <div className='relative z-10 flex items-center w-full gap-4 mb-8'>
         <div className='p-3 rounded-xl bg-[#161616] border border-[#1e1e1e] flex items-center justify-center'>
           <i
             className={`${config.icon} text-xl w-5 h-5 flex items-center justify-center`}
@@ -43,14 +44,14 @@ export function SportPageClient({ sport }: { sport: SportId }) {
           <button
             onClick={() => toggleFavourite(sport)}
             className={cn(
-              "p-2.5 rounded-xl border transition-all active:scale-95",
-              isFav 
-                ? "bg-yellow-500/10 border-yellow-500/20 text-yellow-500" 
-                : "bg-[#161616] border-[#1e1e1e] text-[#444] hover:text-[#888]"
+              'p-2.5 rounded-xl border transition-all active:scale-95',
+              isFav
+                ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500'
+                : 'bg-[#161616] border-[#1e1e1e] text-[#444] hover:text-[#888]',
             )}
-            title={isFav ? "Remove from favorites" : "Add to favorites"}
+            title={isFav ? 'Remove from favorites' : 'Add to favorites'}
           >
-            <Star className={cn("w-5 h-5", isFav && "fill-current")} />
+            <Star className={cn('w-5 h-5', isFav && 'fill-current')} />
           </button>
         </div>
       </div>
@@ -65,8 +66,10 @@ export function SportPageClient({ sport }: { sport: SportId }) {
 
       {/* Loading */}
       {loading && (
-        <div className='relative z-10 flex justify-center py-20'>
-          <Loader2 className='animate-spin text-[#333] w-6 h-6' />
+        <div className='relative z-10 flex flex-col gap-4'>
+          <SkeletonMatchCard />
+          <SkeletonMatchCard />
+          <SkeletonMatchCard />
         </div>
       )}
 

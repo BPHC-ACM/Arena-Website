@@ -2,11 +2,11 @@ import type { CarromMatch } from "@/app/lib/types";
 import { cn } from "@/app/lib/utils";
 
 export function CarromCard({ match }: { match: CarromMatch }) {
-  const { player1, player2, scorePlayer1, scorePlayer2, currentBoard, boardsPlayer1, boardsPlayer2, bestOf, striker, status } = match;
+  const { player1, player2, scorePlayer1, scorePlayer2, currentBoard, bestOf, striker, status, board1Player1, board2Player1, board3Player1, board1Player2, board2Player2, board3Player2 } = match;
 
   const rows = [
-    { name: player1, score: scorePlayer1, boards: boardsPlayer1, isStriker: striker === 1 },
-    { name: player2, score: scorePlayer2, boards: boardsPlayer2, isStriker: striker === 2 },
+    { name: player1, score: scorePlayer1, boards: [board1Player1 ?? 0, board2Player1 ?? 0, board3Player1 ?? 0], isStriker: striker === 1 },
+    { name: player2, score: scorePlayer2, boards: [board1Player2 ?? 0, board2Player2 ?? 0, board3Player2 ?? 0], isStriker: striker === 2 },
   ];
 
   return (
@@ -25,7 +25,7 @@ export function CarromCard({ match }: { match: CarromMatch }) {
               <span className={cn("font-semibold text-sm truncate", i === 0 ? "text-white" : "text-[#aaa]")}>{p.name}</span>
             </div>
             <div className="flex items-center gap-2">
-              {p.boards?.map((s, j) => (
+              {p.boards.map((s, j) => (
                 <span key={j} className={cn("font-mono text-base min-w-[20px] text-center",
                   j === currentBoard - 1 ? "text-white font-bold" : "text-[#333]")}>{s}</span>
               ))}

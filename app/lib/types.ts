@@ -179,8 +179,12 @@ export interface CarromMatch extends BaseMatch {
   scorePlayer2: number;
   currentBoard: number;
   bestOf?: number;
-  boardsPlayer1: number[];
-  boardsPlayer2: number[];
+  board1Player1?: number;
+  board2Player1?: number;
+  board3Player1?: number;
+  board1Player2?: number;
+  board2Player2?: number;
+  board3Player2?: number;
   striker?: 1 | 2;
 }
 
@@ -190,8 +194,7 @@ export interface ChessMatch extends BaseMatch {
   player2: string;
   timePlayer1: string;
   timePlayer2: string;
-  movesPlayer1: number;
-  movesPlayer2: number;
+  moveCount: number;
   currentTurn?: 1 | 2;
   timeControl?: string;
   result?: string;
@@ -221,32 +224,22 @@ export interface KhoKhoMatch extends BaseMatch {
   chasingTeam?: 'A' | 'B';
   defendersRemaining?: number;
   timeRemaining: string;
-  inningsScoreA: number[];
-  inningsScoreB: number[];
+  inning1ScoreA?: number;
+  inning2ScoreA?: number;
+  inning1ScoreB?: number;
+  inning2ScoreB?: number;
 }
 
 // ── Powerlifting ─────────────────────────────────────────────────────────────
 export interface PowerliftingMatch extends BaseMatch {
   athlete1: string;
   athlete2: string;
-  squatAttempt1Athlete1?: number;
-  squatAttempt2Athlete1?: number;
-  squatAttempt3Athlete1?: number;
-  benchAttempt1Athlete1?: number;
-  benchAttempt2Athlete1?: number;
-  benchAttempt3Athlete1?: number;
-  deadliftAttempt1Athlete1?: number;
-  deadliftAttempt2Athlete1?: number;
-  deadliftAttempt3Athlete1?: number;
-  squatAttempt1Athlete2?: number;
-  squatAttempt2Athlete2?: number;
-  squatAttempt3Athlete2?: number;
-  benchAttempt1Athlete2?: number;
-  benchAttempt2Athlete2?: number;
-  benchAttempt3Athlete2?: number;
-  deadliftAttempt1Athlete2?: number;
-  deadliftAttempt2Athlete2?: number;
-  deadliftAttempt3Athlete2?: number;
+  squatAthlete1?: number;
+  benchAthlete1?: number;
+  deadliftAthlete1?: number;
+  squatAthlete2?: number;
+  benchAthlete2?: number;
+  deadliftAthlete2?: number;
   totalAthlete1: number;
   totalAthlete2: number;
   currentLift?: 'squat' | 'bench' | 'deadlift';

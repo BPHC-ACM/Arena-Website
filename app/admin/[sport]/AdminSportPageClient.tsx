@@ -110,9 +110,9 @@ export function AdminSportPageClient({ sport }: { sport: SportId }) {
   };
 
   return (
-    <div className='px-4 py-6 md:px-10 md:py-10 max-w-2xl mx-auto space-y-6'>
+    <div className='px-4 py-6 md:px-10 md:py-10 max-w-screen md:max-w-2xl space-y-6'>
       {/* Header */}
-      <div className='flex items-center gap-4'>
+      <div className='flex items-center w-full gap-4'>
         <div className='p-3 rounded-xl bg-[#161616] border border-[#1e1e1e] flex items-center justify-center'>
           <i
             className={`${config.icon} text-xl w-5 h-5 flex items-center justify-center`}
@@ -127,14 +127,14 @@ export function AdminSportPageClient({ sport }: { sport: SportId }) {
         <button
           onClick={() => toggleFavourite(sport)}
           className={cn(
-            "p-2.5 rounded-xl border transition-all active:scale-95",
+            'p-2.5 rounded-xl border transition-all active:scale-95',
             isFav
-              ? "bg-yellow-500/10 border-yellow-500/20 text-yellow-500"
-              : "bg-[#161616] border-[#1e1e1e] text-[#444] hover:text-[#888]"
+              ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500'
+              : 'bg-[#161616] border-[#1e1e1e] text-[#444] hover:text-[#888]',
           )}
-          title={isFav ? "Remove from favorites" : "Add to favorites"}
+          title={isFav ? 'Remove from favorites' : 'Add to favorites'}
         >
-          <Star className={cn("w-4 h-4", isFav && "fill-current")} />
+          <Star className={cn('w-4 h-4', isFav && 'fill-current')} />
         </button>
         {token && (
           <button
@@ -199,9 +199,9 @@ export function AdminSportPageClient({ sport }: { sport: SportId }) {
                       <SelectContent className='bg-[#111] border-[#222]'>
                         {matches.map((m) => (
                           <SelectItem
-                              key={m.id}
-                              value={String(m.id)}
-                              className='text-[14px]'
+                            key={m.id}
+                            value={String(m.id)}
+                            className='text-[14px]'
                           >
                             <div className='flex items-center gap-2'>
                               {isInProgress(m) && (
@@ -210,8 +210,8 @@ export function AdminSportPageClient({ sport }: { sport: SportId }) {
                                   style={{ background: ACCENT }}
                                 />
                               )}
-                              #{m.id} - {m.teamA ?? m.player1} vs{' '}
-                              {m.teamB ?? m.player2}
+                              #{m.id} - {m.teamA || m.player1 || m.athlete1 || m.swimmer1 || 'TBA'} vs{' '}
+                              {m.teamB || m.player2 || m.athlete2 || m.swimmer2 || 'TBA'}
                             </div>
                           </SelectItem>
                         ))}

@@ -42,11 +42,11 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
             <div className='w-16 h-16 bg-[#57a639]/10 rounded-full flex items-center justify-center mx-auto mb-4'>
               <ShieldHalf className='w-8 h-8 text-[#57a639]' />
             </div>
-            <h1 className='text-2xl font-black italic tracking-tighter uppercase mb-2'>
-              Admin <span className='text-[#57a639]'>Access</span>
+            <h1 className='text-2xl font-black uppercase mb-2'>
+              Firewallz <span className='text-[#57a639]'>Access</span>
             </h1>
             <p className='text-[#666] text-xs uppercase tracking-widest font-semibold'>
-              Restricted Area - Authentication Required
+              Authentication Required
             </p>
           </div>
 
@@ -59,7 +59,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
                 onChange={(e) => setPassword(e.target.value)}
                 className={cn(
                   'w-full bg-[#161616] border border-[#222] rounded-xl px-5 py-4 text-center text-lg tracking-[0.3em] font-bold focus:outline-none focus:border-[#57a639] transition-all',
-                  error && 'border-red-500/50 bg-red-500/5'
+                  error && 'border-red-500/50 bg-red-500/5',
                 )}
                 autoFocus
               />
@@ -165,10 +165,13 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
       </aside>
       <div className='flex-1 flex flex-col min-h-0 overflow-hidden relative'>
         <main
-          className='flex-1 overflow-y-auto min-h-0'
+          className='flex-1 overflow-y-auto min-h-0 flex flex-col'
           data-lenis-prevent='true'
         >
-          {children}
+          <div className='flex-1 flex flex-col'>{children}</div>
+          <footer className='text-[13px] text-center font-bold tracking-[0.16em] uppercase pb-6 mt-auto text-[#666]'>
+            BUILT BY ACM
+          </footer>
         </main>
       </div>
     </div>
@@ -191,8 +194,8 @@ function AdminNavItems({ onClick }: { onClick?: () => void }) {
   }, [favourites, isLoaded]);
 
   const { favouriteSports, otherSports } = useMemo(() => {
-    const favs = sortedSports.filter(s => favourites.includes(s.id));
-    const nonFavs = sortedSports.filter(s => !favourites.includes(s.id));
+    const favs = sortedSports.filter((s) => favourites.includes(s.id));
+    const nonFavs = sortedSports.filter((s) => !favourites.includes(s.id));
     return { favouriteSports: favs, otherSports: nonFavs };
   }, [sortedSports, favourites]);
 
@@ -229,14 +232,14 @@ function AdminNavItems({ onClick }: { onClick?: () => void }) {
   );
 }
 
-function AdminNavLink({ 
-  sport, 
-  active, 
-  onClick 
-}: { 
-  sport: typeof SPORTS[0]; 
-  active: boolean; 
-  onClick?: () => void 
+function AdminNavLink({
+  sport,
+  active,
+  onClick,
+}: {
+  sport: (typeof SPORTS)[0];
+  active: boolean;
+  onClick?: () => void;
 }) {
   return (
     <Link
@@ -261,7 +264,7 @@ function AdminNavLink({
       <i
         className={`${sport.icon} text-base w-4 text-center flex-shrink-0`}
       ></i>
-      <span className="truncate">{sport.name}</span>
+      <span className='truncate'>{sport.name}</span>
     </Link>
   );
 }

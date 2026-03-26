@@ -21,8 +21,10 @@ const createKhoKhoMatch = (data) => {
     chasingTeam: data.chasingTeam || "A",
     defendersRemaining: data.defendersRemaining || 7,
     timeRemaining: data.timeRemaining || "7:00",
-    inningsScoreA: data.inningsScoreA || [],
-    inningsScoreB: data.inningsScoreB || [],
+    inning1ScoreA: data.inning1ScoreA || 0,
+    inning2ScoreA: data.inning2ScoreA || 0,
+    inning1ScoreB: data.inning1ScoreB || 0,
+    inning2ScoreB: data.inning2ScoreB || 0,
     status: data.status || "",
   };
   khokhoMatches.push(newMatch);

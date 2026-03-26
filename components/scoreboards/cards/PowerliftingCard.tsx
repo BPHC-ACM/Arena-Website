@@ -2,24 +2,16 @@ import type { PowerliftingMatch } from "@/app/lib/types";
 import { cn } from "@/app/lib/utils";
 
 export function PowerliftingCard({ match }: { match: PowerliftingMatch }) {
-  const { athlete1, athlete2, totalAthlete1, totalAthlete2, currentLift, weightClass, status } = match;
-
-  const getBestLift = (a1?: number, a2?: number, a3?: number) => {
-    const valid = [a1, a2, a3].filter(x => x !== undefined && x! > 0);
-    return valid.length > 0 ? Math.max(...(valid as number[])) : 0;
-  };
-
-  const squatBest1 = getBestLift(match.squatAttempt1Athlete1, match.squatAttempt2Athlete1, match.squatAttempt3Athlete1);
-  const benchBest1 = getBestLift(match.benchAttempt1Athlete1, match.benchAttempt2Athlete1, match.benchAttempt3Athlete1);
-  const deadliftBest1 = getBestLift(match.deadliftAttempt1Athlete1, match.deadliftAttempt2Athlete1, match.deadliftAttempt3Athlete1);
-
-  const squatBest2 = getBestLift(match.squatAttempt1Athlete2, match.squatAttempt2Athlete2, match.squatAttempt3Athlete2);
-  const benchBest2 = getBestLift(match.benchAttempt1Athlete2, match.benchAttempt2Athlete2, match.benchAttempt3Athlete2);
-  const deadliftBest2 = getBestLift(match.deadliftAttempt1Athlete2, match.deadliftAttempt2Athlete2, match.deadliftAttempt3Athlete2);
+  const { 
+    athlete1, athlete2, 
+    squatAthlete1, benchAthlete1, deadliftAthlete1, totalAthlete1,
+    squatAthlete2, benchAthlete2, deadliftAthlete2, totalAthlete2,
+    currentLift, weightClass, status 
+  } = match;
 
   const rows = [
-    { name: athlete1, squat: squatBest1, bench: benchBest1, deadlift: deadliftBest1, total: totalAthlete1 },
-    { name: athlete2, squat: squatBest2, bench: benchBest2, deadlift: deadliftBest2, total: totalAthlete2 },
+    { name: athlete1, squat: squatAthlete1, bench: benchAthlete1, deadlift: deadliftAthlete1, total: totalAthlete1 },
+    { name: athlete2, squat: squatAthlete2, bench: benchAthlete2, deadlift: deadliftAthlete2, total: totalAthlete2 },
   ];
 
   return (

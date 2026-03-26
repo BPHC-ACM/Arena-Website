@@ -2,11 +2,11 @@ import type { ChessMatch } from "@/app/lib/types";
 import { cn } from "@/app/lib/utils";
 
 export function ChessCard({ match }: { match: ChessMatch }) {
-  const { player1, player2, timePlayer1, timePlayer2, movesPlayer1, movesPlayer2, currentTurn, timeControl, result, status } = match;
+  const { player1, player2, timePlayer1, timePlayer2, moveCount, currentTurn, timeControl, result, status } = match;
 
   const rows = [
-    { name: player1, time: timePlayer1, moves: movesPlayer1, isTurn: currentTurn === 1 },
-    { name: player2, time: timePlayer2, moves: movesPlayer2, isTurn: currentTurn === 2 },
+    { name: player1, time: timePlayer1, moves: moveCount, isTurn: currentTurn === 1 },
+    { name: player2, time: timePlayer2, moves: moveCount, isTurn: currentTurn === 2 },
   ];
 
   return (

@@ -9,15 +9,6 @@ cd server
 npm install
 ```
 
-## Run Server
-
-```bash
-npm start
-```
-
-Server runs on: `http://localhost:3001`
-WebSocket: `ws://localhost:3001`
-
 ## API Endpoints
 
 ### All Sports Support These Routes:
@@ -39,6 +30,7 @@ DELETE /api/{sport}          - Reset match
 - volleyball
 - kabaddi
 - frisbee
+- hockey
 
 ## WebSocket Events
 
