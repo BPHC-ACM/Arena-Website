@@ -42,7 +42,11 @@ export function CricketCard({ match }: { match: CricketMatch }) {
           .details2 || match.details
       : match.details;
 
-  const fieldingTeam = normalizeFieldingTeam(match.firstFieldingTeam, teamA, teamB);
+  const fieldingTeam = normalizeFieldingTeam(
+    match.firstFieldingTeam,
+    teamA,
+    teamB,
+  );
   const battingTeamKey = getBattingTeamKey(currentInnings, fieldingTeam);
   const isTeamABatting = battingTeamKey === 'A';
   const leftTeamKey = isTeamABatting ? 'B' : 'A';
@@ -56,14 +60,22 @@ export function CricketCard({ match }: { match: CricketMatch }) {
   );
   const oversLeft = `${Math.floor(oversLeftBalls / 6)}.${oversLeftBalls % 6}`;
 
-  const isComplete =
-    status === 'Completed' || status === 'Match complete';
+  const isComplete = status === 'Completed' || status === 'Match complete';
   let winner: 'A' | 'B' | 'Tie' | null = null;
   if (isComplete) {
     if (scoreA.runs > scoreB.runs) winner = 'A';
     else if (scoreB.runs > scoreA.runs) winner = 'B';
     else if (scoreA.runs === scoreB.runs) winner = 'Tie';
   }
+  const statusLabel = isComplete
+    ? winner === 'Tie'
+      ? 'Match tied'
+      : winner === 'A'
+        ? `${teamA} wins`
+        : winner === 'B'
+          ? `${teamB} wins`
+          : status
+    : status;
 
   const renderTeam = (teamKey: 'A' | 'B', align: 'left' | 'right') => {
     const isLoser =
@@ -200,11 +212,13 @@ export function CricketCard({ match }: { match: CricketMatch }) {
         </div>
       )}
 
-
-
       {/* Status */}
-      {status && (
-        <p className='text-xs text-center text-[#555] pt-1'>{status}</p>
+      {statusLabel && (
+        <div className='flex justify-center'>
+          <p className='text-[10px] uppercase font-bold tracking-[0.2em] text-[#CCC] py-1 px-3 rounded-full border border-[#181818] bg-[#080808]'>
+            {statusLabel}
+          </p>
+        </div>
       )}
     </div>
   );

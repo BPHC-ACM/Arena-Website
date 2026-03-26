@@ -16,7 +16,7 @@ export function isInProgress(match: Record<string, any>): boolean {
   // Default to live if no status yet, as matches are typically created when they start
   if (!s) return true;
 
-  return !['won', 'completed', 'match over', 'ended', 'finished', 'full time', 'tied', 'draw'].some(
+  return !['won', 'complete', 'match over', 'ended', 'finished', 'full time', 'tied', 'draw'].some(
     (w) => s.includes(w),
   );
 }

@@ -27,38 +27,49 @@ export function TennisForm({ match, onSave, isCreate }: any) {
     if (isTieBreak()) {
       const p1Score = parseInt(form.currentGameScorePlayer1) || 0;
       const p2Score = parseInt(form.currentGameScorePlayer2) || 0;
-      
+
       const newP1 = player === 1 ? p1Score + 1 : p1Score;
       const newP2 = player === 2 ? p2Score + 1 : p2Score;
 
       if ((newP1 >= 7 || newP2 >= 7) && Math.abs(newP1 - newP2) >= 2) {
-         const s1 = [...(form.setsPlayer1 || [])]; 
-         const s2 = [...(form.setsPlayer2 || [])];
-         const si = (form.currentSet || 1) - 1;
-         s1[si] = (s1[si] || 0) + (player === 1 ? 1 : 0);
-         s2[si] = (s2[si] || 0) + (player === 2 ? 1 : 0);
-         const nextSet = (form.currentSet || 1) + 1;
-         update({ 
-           setsPlayer1: s1, 
-           setsPlayer2: s2, 
-           currentGameScorePlayer1: '0', 
-           currentGameScorePlayer2: '0', 
-           currentSet: nextSet,
-           status: `Set ${nextSet}`,
-           server: form.server === 1 ? 2 : 1 
-         });
+        const s1 = [...(form.setsPlayer1 || [])];
+        const s2 = [...(form.setsPlayer2 || [])];
+        const si = (form.currentSet || 1) - 1;
+        s1[si] = (s1[si] || 0) + (player === 1 ? 1 : 0);
+        s2[si] = (s2[si] || 0) + (player === 2 ? 1 : 0);
+        const nextSet = (form.currentSet || 1) + 1;
+        update({
+          setsPlayer1: s1,
+          setsPlayer2: s2,
+          currentGameScorePlayer1: '0',
+          currentGameScorePlayer2: '0',
+          currentSet: nextSet,
+          status: `Set ${nextSet}`,
+          server: form.server === 1 ? 2 : 1,
+        });
       } else {
-         update({ currentGameScorePlayer1: newP1.toString(), currentGameScorePlayer2: newP2.toString() });
+        update({
+          currentGameScorePlayer1: newP1.toString(),
+          currentGameScorePlayer2: newP2.toString(),
+        });
       }
       return;
     }
 
     const SCORES = ['0', '15', '30', '40', 'A'];
-    const wCur = String(player === 1 ? form.currentGameScorePlayer1 : form.currentGameScorePlayer2);
-    const lCur = String(player === 1 ? form.currentGameScorePlayer2 : form.currentGameScorePlayer1);
-    
+    const wCur = String(
+      player === 1
+        ? form.currentGameScorePlayer1
+        : form.currentGameScorePlayer2,
+    );
+    const lCur = String(
+      player === 1
+        ? form.currentGameScorePlayer2
+        : form.currentGameScorePlayer1,
+    );
+
     const winGame = () => {
-      const s1 = [...(form.setsPlayer1 ?? [])]; 
+      const s1 = [...(form.setsPlayer1 ?? [])];
       const s2 = [...(form.setsPlayer2 ?? [])];
       const si = (form.currentSet || 1) - 1;
       s1[si] = (s1[si] || 0) + (player === 1 ? 1 : 0);
@@ -66,28 +77,41 @@ export function TennisForm({ match, onSave, isCreate }: any) {
 
       const g1 = s1[si];
       const g2 = s2[si];
-      const setOver = (g1 >= 6 && g1 - g2 >= 2) || (g2 >= 6 && g2 - g1 >= 2) || g1 === 7 || g2 === 7;
-      const nextSet = setOver ? (form.currentSet || 1) + 1 : (form.currentSet || 1);
+      const setOver =
+        (g1 >= 6 && g1 - g2 >= 2) ||
+        (g2 >= 6 && g2 - g1 >= 2) ||
+        g1 === 7 ||
+        g2 === 7;
+      const nextSet = setOver
+        ? (form.currentSet || 1) + 1
+        : form.currentSet || 1;
 
-      update({ 
-        setsPlayer1: s1, 
-        setsPlayer2: s2, 
-        currentGameScorePlayer1: '0', 
-        currentGameScorePlayer2: '0', 
+      update({
+        setsPlayer1: s1,
+        setsPlayer2: s2,
+        currentGameScorePlayer1: '0',
+        currentGameScorePlayer2: '0',
         server: form.server === 1 ? 2 : 1,
         currentSet: nextSet,
-        ...(setOver ? { status: `Set ${nextSet}` } : {})
+        ...(setOver ? { status: `Set ${nextSet}` } : {}),
       });
     };
 
-    if (wCur === 'A' || (wCur === '40' && lCur !== '40' && lCur !== 'A')) return winGame();
+    if (wCur === 'A' || (wCur === '40' && lCur !== '40' && lCur !== 'A'))
+      return winGame();
     if (wCur === '40' && lCur === 'A') {
       update({ currentGameScorePlayer1: '40', currentGameScorePlayer2: '40' });
     } else if (wCur === '40' && lCur === '40') {
-      update({ [player === 1 ? 'currentGameScorePlayer1' : 'currentGameScorePlayer2']: 'A' });
+      update({
+        [player === 1 ? 'currentGameScorePlayer1' : 'currentGameScorePlayer2']:
+          'A',
+      });
     } else {
       const idx = SCORES.indexOf(wCur);
-      update({[player === 1 ? 'currentGameScorePlayer1' : 'currentGameScorePlayer2']: SCORES[Math.min(idx + 1, 3)] });
+      update({
+        [player === 1 ? 'currentGameScorePlayer1' : 'currentGameScorePlayer2']:
+          SCORES[Math.min(idx + 1, 3)],
+      });
     }
   };
 
@@ -106,8 +130,18 @@ export function TennisForm({ match, onSave, isCreate }: any) {
   return (
     <div className='space-y-5'>
       <div className='grid grid-cols-2 gap-3'>
-        <TF label='Player 1' value={form.player1} onChange={(v: string) => update({ player1: v })} placeholder='Djokovic' />
-        <TF label='Player 2' value={form.player2} onChange={(v: string) => update({ player2: v })} placeholder='Nadal' />
+        <TF
+          label='Player 1'
+          value={form.player1}
+          onChange={(v: string) => update({ player1: v })}
+          placeholder='Djokovic'
+        />
+        <TF
+          label='Player 2'
+          value={form.player2}
+          onChange={(v: string) => update({ player2: v })}
+          placeholder='Nadal'
+        />
       </div>
       <Separator className='bg-[#1e1e1e]' />
       <Label className='text-xs text-[#888] font-medium uppercase tracking-wider'>
@@ -115,14 +149,24 @@ export function TennisForm({ match, onSave, isCreate }: any) {
       </Label>
       <div className='flex gap-3'>
         <button
-          onClick={(e) => { e.preventDefault(); winPoint(1); }}
+          onClick={(e) => {
+            e.preventDefault();
+            winPoint(1);
+          }}
           className='flex-1 py-4 rounded-xl border text-sm font-bold'
-          style={{ background: `${ACCENT}18`, borderColor: `${ACCENT}44`, color: ACCENT }}
+          style={{
+            background: `${ACCENT}18`,
+            borderColor: `${ACCENT}44`,
+            color: ACCENT,
+          }}
         >
           Point to {form.player1 || 'P1'}
         </button>
         <button
-          onClick={(e) => { e.preventDefault(); winPoint(2); }}
+          onClick={(e) => {
+            e.preventDefault();
+            winPoint(2);
+          }}
           className='flex-1 py-4 rounded-xl border text-sm font-bold text-[#ccc]'
           style={{ background: '#161616', borderColor: '#2a2a2a' }}
         >
@@ -136,7 +180,7 @@ export function TennisForm({ match, onSave, isCreate }: any) {
             {form.currentGameScorePlayer1}
           </p>
         </div>
-        <div className='self-center text-[#333] mt-4 text-lg'>—</div>
+        <div className='self-center text-[#333] mt-4 text-lg'>-</div>
         <div className='text-center'>
           <p className='text-xs text-[#888]'>{form.player2 || 'P2'}</p>
           <p className='font-mono text-3xl font-extrabold text-white mt-1'>
@@ -154,11 +198,16 @@ export function TennisForm({ match, onSave, isCreate }: any) {
         onChange={(v) => update({ server: v })}
       />
       <div className='grid grid-cols-3 gap-3'>
-        <TF label='Current Set' value={form.currentSet} type='number' onChange={(v: number) => {
+        <TF
+          label='Current Set'
+          value={form.currentSet}
+          type='number'
+          onChange={(v: number) => {
             const updates: any = { currentSet: v };
             if (v >= 1 && v <= 5) updates.status = `Set ${v}`;
             update(updates);
-        }} />
+          }}
+        />
         <div className='space-y-1.5'>
           <Label className='text-xs text-[#888] font-medium uppercase tracking-wider'>
             Sets P1
@@ -194,7 +243,11 @@ export function TennisForm({ match, onSave, isCreate }: any) {
           />
         </div>
       </div>
-      <StatusSelect sport='tennis' value={form.status ?? ''} onChange={handleStatusChange} />
+      <StatusSelect
+        sport='tennis'
+        value={form.status ?? ''}
+        onChange={handleStatusChange}
+      />
       {isCreate && <SaveBtn onClick={() => onSave(form)} isCreate />}
     </div>
   );
