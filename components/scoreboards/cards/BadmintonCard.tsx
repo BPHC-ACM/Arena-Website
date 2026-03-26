@@ -4,9 +4,12 @@ import { cn } from "@/app/lib/utils";
 export function BadmintonCard({ match }: { match: BadmintonMatch }) {
   const { player1, player2, gamesPlayer1, gamesPlayer2, currentGame, currentPointsPlayer1, currentPointsPlayer2, server, bestOf, status } = match;
 
+  const p1SetsWon = (gamesPlayer1 || []).filter((s, i) => s > (gamesPlayer2?.[i] || 0)).length;
+  const p2SetsWon = (gamesPlayer2 || []).filter((s, i) => s > (gamesPlayer1?.[i] || 0)).length;
+
   const rows = [
-    { name: player1, games: gamesPlayer1, cur: currentPointsPlayer1, serving: server === 1 },
-    { name: player2, games: gamesPlayer2, cur: currentPointsPlayer2, serving: server === 2 },
+    { name: player1, setsWon: p1SetsWon, cur: currentPointsPlayer1, serving: server === 1 },
+    { name: player2, setsWon: p2SetsWon, cur: currentPointsPlayer2, serving: server === 2 },
   ];
 
   return (
@@ -14,8 +17,12 @@ export function BadmintonCard({ match }: { match: BadmintonMatch }) {
       <div className="rounded-lg bg-[#0d0d0d] overflow-hidden">
         <div className="flex items-center gap-2 px-3 pt-2 pb-1">
           <span className="text-[10px] text-[#444] uppercase tracking-wider">Best of {bestOf ?? 3}</span>
-          <span className="text-[10px] text-[#444]">·</span>
-          <span className="text-[10px] text-[#444] uppercase tracking-wider">Game {currentGame}</span>
+          {status !== 'Match complete' && (
+            <>
+              <span className="text-[10px] text-[#444]">·</span>
+              <span className="text-[10px] text-[#444] uppercase tracking-wider">Game {currentGame}</span>
+            </>
+          )}
         </div>
 
         {rows.map((p, i) => (
@@ -25,10 +32,9 @@ export function BadmintonCard({ match }: { match: BadmintonMatch }) {
               <span className={cn("font-semibold text-sm truncate", i === 0 ? "text-white" : "text-[#aaa]")}>{p.name}</span>
             </div>
             <div className="flex items-center gap-2">
-              {p.games.map((s, j) => (
-                <span key={j} className={cn("font-mono text-base min-w-[20px] text-center",
-                  j === currentGame - 1 ? "text-white font-bold" : "text-[#333]")}>{s}</span>
-              ))}
+              <span className="font-mono text-lg md:text-xl text-white min-w-[28px] text-center bg-[#1a1a1a] rounded px-1.5 py-0.5 mr-2">
+                {p.setsWon}
+              </span>
               <span className="font-mono text-3xl font-extrabold text-white ml-2 min-w-[40px] text-right">{p.cur}</span>
             </div>
           </div>

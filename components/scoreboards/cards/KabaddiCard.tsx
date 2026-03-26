@@ -1,7 +1,7 @@
 import type { KabaddiMatch } from "@/app/lib/types";
 
 export function KabaddiCard({ match }: { match: KabaddiMatch }) {
-  const { teamA, teamB, scoreA, scoreB, playersOnMatA, playersOnMatB, raidTimer, raidingTeam, bonusActive, superRaidActive, half, timeRemaining, status } = match;
+  const { teamA, teamB, scoreA, scoreB, raidTimer, raidingTeam, bonusActive, superRaidActive, half, timeRemaining, status } = match;
 
   return (
     <div className="space-y-4">
@@ -9,7 +9,6 @@ export function KabaddiCard({ match }: { match: KabaddiMatch }) {
         <div>
           <p className="text-base md:text-lg font-bold text-white">{teamA}</p>
           <p className="font-mono text-4xl md:text-5xl font-extrabold text-white mt-1">{scoreA}</p>
-          <p className="text-xs text-[#555] mt-1">{playersOnMatA} <span className="text-[#444]">on mat</span></p>
         </div>
         <div className="text-center px-2">
           <p className="font-mono text-lg font-bold text-white">{raidTimer}s</p>
@@ -19,7 +18,6 @@ export function KabaddiCard({ match }: { match: KabaddiMatch }) {
         <div className="text-right">
           <p className="text-base md:text-lg font-bold text-white">{teamB}</p>
           <p className="font-mono text-4xl md:text-5xl font-extrabold text-[#bbb] mt-1">{scoreB}</p>
-          <p className="text-xs text-[#555] mt-1">{playersOnMatB} <span className="text-[#444]">on mat</span></p>
         </div>
       </div>
 

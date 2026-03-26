@@ -1,12 +1,17 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { TF, StatusSelect, SaveBtn } from '../shared/FormControls';
 import { ScorePanel } from '../shared/ScorePanels';
+import { ClockSection } from '../shared/ClockSection';
 import { DEFAULTS } from '../shared/constants';
 
 export function HockeyForm({ match, onSave, isCreate }: any) {
   const [form, setForm] = useState(match ?? DEFAULTS['hockey']);
+
+  useEffect(() => {
+    if (match) setForm(match);
+  }, [match]);
 
   const update = (updates: any) => {
     const next = { ...form, ...updates };
@@ -36,14 +41,33 @@ export function HockeyForm({ match, onSave, isCreate }: any) {
         <TF label='Team B' value={form.teamB} onChange={(v: string) => update({ teamB: v })} placeholder='Team B' />
       </div>
       <Separator className='bg-[#1e1e1e]' />
+
       <div className='flex gap-3'>
         <ScorePanel name={form.teamA || 'Team A'} score={form.scoreA} onDelta={(d) => update({ scoreA: Math.max(0, form.scoreA + d) })} />
         <ScorePanel name={form.teamB || 'Team B'} score={form.scoreB} onDelta={(d) => update({ scoreB: Math.max(0, form.scoreB + d) })} />
       </div>
-      <div className='grid grid-cols-2 gap-3'>
-        <TF label='Current Period' type='number' value={form.currentPeriod} onChange={(v: number) => update({ currentPeriod: v })} />
-        <TF label='Match Time' value={form.matchTime} onChange={(v: string) => update({ matchTime: v })} placeholder='0:00' />
-      </div>
+
+      {/* Clock — count-up for Hockey */}
+      <ClockSection
+        timeValue={form.matchTime ?? '0:00'}
+        running={!!form.clockRunning}
+        mode='countup'
+        defaultTime='00:00'
+        label='Match Clock'
+        onChange={(time, running) => update({ matchTime: time, clockRunning: running })}
+      >
+        <TF
+          label='Current Period'
+          type='number'
+          value={form.currentPeriod}
+          onChange={(v: number) => {
+            const updates: any = { currentPeriod: v };
+            if (v >= 1 && v <= 3) updates.status = `Period ${v}`;
+            update(updates);
+          }}
+        />
+      </ClockSection>
+
       <StatusSelect sport='hockey' value={form.status ?? ''} onChange={handleStatusChange} />
       {isCreate && <SaveBtn onClick={() => onSave(form)} isCreate />}
     </div>

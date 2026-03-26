@@ -90,6 +90,7 @@ export const DEFAULTS: Record<SportId, any> = {
     scoreB: 0,
     matchTime: 0,
     half: 1,
+    clockRunning: false,
     events: [],
     status: 'Kick-off',
   },
@@ -143,6 +144,7 @@ export const DEFAULTS: Record<SportId, any> = {
     superRaidActive: false,
     half: 1,
     timeRemaining: '20:00',
+    clockRunning: false,
     status: '1st half',
   },
   frisbee: {
@@ -189,6 +191,7 @@ export const DEFAULTS: Record<SportId, any> = {
     scoreB: 0,
     currentPeriod: 1,
     matchTime: '0:00',
+    clockRunning: false,
     periodScoresA: [0, 0, 0],
     periodScoresB: [0, 0, 0],
     penaltiesA: 0,

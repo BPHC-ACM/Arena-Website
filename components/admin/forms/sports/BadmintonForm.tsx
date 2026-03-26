@@ -31,11 +31,18 @@ export function BadmintonForm({ match, onSave, isCreate }: any) {
       g1.push(player === 1 ? pts : opp);
       g2.push(player === 2 ? pts : opp);
       
+      const bestOf = form.bestOf ?? 3;
+      const gamesNeeded = Math.ceil(bestOf / 2);
+      const p1WonGames = g1.filter((s, i) => s > g2[i]).length;
+      const p2WonGames = g2.filter((s, i) => s > g1[i]).length;
+      const matchWon = p1WonGames >= gamesNeeded || p2WonGames >= gamesNeeded;
+
       update({
         gamesPlayer1: g1, gamesPlayer2: g2,
-        currentGame: (form.currentGame || 1) + 1,
+        currentGame: matchWon ? form.currentGame || 1 : (form.currentGame || 1) + 1,
         currentPointsPlayer1: 0, currentPointsPlayer2: 0,
         server: player,
+        ...(matchWon && { status: 'Match complete', summary: `${player === 1 ? form.player1 || 'Player 1' : form.player2 || 'Player 2'} won` })
       });
     } else {
       update({ [f]: pts, server: player });
