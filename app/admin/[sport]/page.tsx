@@ -6,7 +6,6 @@ import { SPORTS, getSport, ACCENT, type SportId } from '@/app/lib/sports';
 import { useMatchStream } from '@/app/lib/useMatchStream';
 import { isInProgress } from '@/app/lib/utils';
 import { API_BASE_URL } from '@/app/lib/websocket';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,11 +15,11 @@ import {
   Lock,
   ShieldHalf,
   XCircle,
-  CheckCircle2,
+  LogOut,
   Plus,
   Trash2,
+  CheckCircle2,
 } from 'lucide-react';
-
 import {
   Select,
   SelectContent,
@@ -28,9 +27,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
 import { CricketAdminForm } from '@/components/admin/forms/CricketAdminForm';
 import { GenericAdminForm } from '@/components/admin/forms/GenericAdminForm';
+import { CreateMatchModal } from '@/components/admin/CreateMatchModal';
 
 export default function AdminSportPage({
   params,
@@ -44,23 +43,35 @@ export default function AdminSportPage({
 
 function AdminPageInner({ sport }: { sport: SportId }) {
   const config = getSport(sport);
-  const { matches, loading, wsConnected } = useMatchStream(sport);
+  const { matches, loading } = useMatchStream(sport);
 
   const [token, setToken] = useState('');
   const [mounted, setMounted] = useState(false);
+  const [tokenInput, setTokenInput] = useState('');
+  const [tokenError, setTokenError] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     setToken('');
     setTokenInput('');
   }, [sport]);
-  const [tokenInput, setTokenInput] = useState('');
-  const [tokenError, setTokenError] = useState(false);
 
-  const applyToken = () => {
-    if (!tokenInput.trim()) return;
-    setToken(tokenInput.trim());
+  const [verifying, setVerifying] = useState(false);
+  const applyToken = async () => {
+    if (!tokenInput.trim() || verifying) return;
+    setVerifying(true);
     setTokenError(false);
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/verify`, {
+        headers: { Authorization: `Bearer ${tokenInput.trim()}` },
+      });
+      if (!res.ok) throw new Error();
+      setToken(tokenInput.trim());
+    } catch {
+      setTokenError(true);
+    } finally {
+      setVerifying(false);
+    }
   };
 
   // Match selection
@@ -70,32 +81,22 @@ function AdminPageInner({ sport }: { sport: SportId }) {
     if (matches.length && !selectedMatchId) setSelectedMatchId(matches[0].id);
   }, [matches, selectedMatchId]);
 
-  // Status messages
-  const [updateStatus, setUpdateStatus] = useState<{
-    ok: boolean;
-    msg: string;
-  } | null>(null);
-  const [createStatus, setCreateStatus] = useState<{
-    ok: boolean;
-    msg: string;
-  } | null>(null);
+  // Create modal
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  // Status message (shared for update/create/delete)
+  const [status, setStatus] = useState<{ ok: boolean; msg: string } | null>(
+    null,
+  );
 
   const mutate = useCallback(
-    async (
-      method: 'PUT' | 'POST' | 'DELETE',
-      path: string,
-      body: any,
-      onStatus: (s: { ok: boolean; msg: string } | null) => void,
-    ) => {
+    async (method: 'PUT' | 'POST' | 'DELETE', path: string, body: any) => {
       if (!token) {
         setTokenError(true);
         return;
       }
-      if (method === 'POST') {
-        onStatus({ ok: true, msg: 'Saving…' });
-      } else {
-        onStatus(null);
-      }
+      if (method === 'POST') setStatus({ ok: true, msg: 'Saving…' });
+      else setStatus(null);
       try {
         const res = await fetch(`${API_BASE_URL}${path}`, {
           method,
@@ -108,13 +109,13 @@ function AdminPageInner({ sport }: { sport: SportId }) {
         const data = await res.json().catch(() => null);
         if (!res.ok) throw new Error(data?.error ?? 'Request failed');
         if (method === 'POST' || method === 'DELETE') {
-          onStatus({ ok: true, msg: 'Saved successfully' });
-          setTimeout(() => onStatus(null), 3000);
+          setStatus({ ok: true, msg: 'Saved successfully' });
+          setTimeout(() => setStatus(null), 3000);
         } else {
-          onStatus(null);
+          setStatus(null);
         }
       } catch (err) {
-        onStatus({
+        setStatus({
           ok: false,
           msg: err instanceof Error ? err.message : 'Error occurred',
         });
@@ -124,11 +125,22 @@ function AdminPageInner({ sport }: { sport: SportId }) {
   );
 
   const updateMatch = (body: any) =>
-    mutate('PUT', `/${sport}/${selectedMatchId}/update`, body, setUpdateStatus);
+    mutate('PUT', `/${sport}/${selectedMatchId}/update`, body);
   const createMatch = (body: any) =>
-    mutate('POST', `/${sport}`, body, setCreateStatus);
-  const deleteMatch = (id: number) =>
-    mutate('DELETE', `/${sport}/${id}`, {}, setUpdateStatus);
+    mutate('POST', `/${sport}`, {
+      ...body,
+      status: sport === 'cricket' ? 'Innings I' : 'Live',
+    });
+  const deleteMatch = (id: number) => {
+    if (
+      !window.confirm(
+        'Are you sure you want to delete this match? This action cannot be undone.',
+      )
+    ) {
+      return;
+    }
+    mutate('DELETE', `/${sport}/${id}`, {});
+  };
 
   return (
     <div className='px-4 py-6 md:px-10 md:py-10 max-w-2xl mx-auto space-y-6'>
@@ -143,22 +155,20 @@ function AdminPageInner({ sport }: { sport: SportId }) {
         <div className='flex-1'>
           <div className='flex items-center gap-2.5'>
             <h1 className='text-2xl font-bold text-white'>{config.name}</h1>
-            <Badge
-              variant='outline'
-              className='text-[11px] font-bold tracking-widest'
-              style={{ color: ACCENT, borderColor: `${ACCENT}44` }}
-            >
-              ADMIN
-            </Badge>
           </div>
         </div>
-        <span
-          className='w-2.5 h-2.5 rounded-full flex-shrink-0'
-          style={{
-            background: wsConnected ? ACCENT : '#2a2a2a',
-            boxShadow: wsConnected ? `0 0 8px ${ACCENT}` : 'none',
-          }}
-        />
+        {token && (
+          <button
+            onClick={() => {
+              setToken('');
+              setTokenInput('');
+            }}
+            className='p-2.5 rounded-xl bg-[#161616] border border-[#1e1e1e] text-[#555] hover:text-red-400 transition-all active:scale-95'
+            title='Logout'
+          >
+            <LogOut className='w-4 h-4' />
+          </button>
+        )}
       </div>
 
       {!mounted ? (
@@ -168,7 +178,7 @@ function AdminPageInner({ sport }: { sport: SportId }) {
       ) : (
         <>
           {/* Token gate */}
-          {!token ? (
+          {!token && (
             <div className='rounded-xl bg-[#111] border border-[#2a2a2a] p-6 space-y-4'>
               <div className='flex items-center gap-2.5 mb-2'>
                 <Lock
@@ -192,230 +202,161 @@ function AdminPageInner({ sport }: { sport: SportId }) {
                   />
                   <Button
                     onClick={applyToken}
+                    disabled={verifying}
                     className='h-10 px-5 font-bold text-black'
                     style={{ background: ACCENT }}
                   >
-                    <ShieldHalf className='w-4 h-4 mr-2' />
-                    Unlock
+                    {verifying ? (
+                      <Loader2 className='w-4 h-4 animate-spin' />
+                    ) : (
+                      <>
+                        <ShieldHalf className='w-4 h-4 mr-2' />
+                        Unlock
+                      </>
+                    )}
                   </Button>
                 </div>
                 {tokenError && (
                   <p className='text-[13px] text-red-400 flex items-center gap-1.5'>
-                    <XCircle className='w-3.5 h-3.5 flex-shrink-0 text-red-500' />
-                    Password required to make changes.
+                    <XCircle className='w-4 h-4 flex-shrink-0' />
+                    Invalid password.
                   </p>
                 )}
               </div>
             </div>
-          ) : (
-            <div
-              className='flex items-center gap-2.5 px-4 py-3 rounded-xl bg-[#0d150a] border'
-              style={{ borderColor: `${ACCENT}30` }}
-            >
-              <CheckCircle2
-                className='w-4 h-4 flex-shrink-0'
-                style={{ color: ACCENT }}
-              />
-              <span
-                className='text-[15px] font-semibold'
-                style={{ color: ACCENT }}
-              >
-                Authenticated
-              </span>
-              <button
-                onClick={() => {
-                  setToken('');
-                  setTokenInput('');
-                }}
-                className='ml-auto text-[13px] text-[#555] hover:text-[#888] underline'
-              >
-                Logout
-              </button>
-            </div>
           )}
 
-          {/* Tabs */}
           {token && (
-            <Tabs defaultValue='update'>
-              <TabsList className='bg-[#111] border border-[#222] w-full h-11'>
-                <TabsTrigger
-                  value='update'
-                  className='flex-1 text-[14px] font-medium data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-white'
-                >
-                  Update Match
-                </TabsTrigger>
-                <TabsTrigger
-                  value='create'
-                  className='flex-1 text-[14px] font-medium data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-white'
-                >
-                  <Plus className='w-4 h-4 mr-2' />
-                  New Match
-                </TabsTrigger>
-              </TabsList>
+            <div className='space-y-5'>
+              {loading && (
+                <div className='flex justify-center py-10'>
+                  <Loader2 className='animate-spin text-[#333] w-6 h-6' />
+                </div>
+              )}
 
-              {/* Update */}
-              <TabsContent value='update' className='mt-5 space-y-5'>
-                {loading && (
-                  <div className='flex justify-center py-10'>
-                    <Loader2 className='animate-spin text-[#333] w-6 h-6' />
+              {/* Match selector row */}
+              {!loading && (
+                <div className='space-y-2'>
+                  <div className='flex items-center justify-between'>
+                    <Label className='text-md text-[#666]'>Score Updates</Label>
+                    <button
+                      onClick={() => setShowCreateModal(true)}
+                      className='flex items-center gap-1.5 text-[13px] font-semibold px-3 py-1.5 rounded-lg border transition-colors'
+                      style={{
+                        color: ACCENT,
+                        borderColor: `${ACCENT}44`,
+                        background: `${ACCENT}12`,
+                      }}
+                    >
+                      <Plus className='w-3.5 h-3.5 flex-shrink-0' />
+                      New Match
+                    </button>
                   </div>
-                )}
-                {!loading && matches.length === 0 && (
-                  <p className='text-[15px] text-center text-[#444] py-10'>
-                    No matches yet. Create one first.
-                  </p>
-                )}
-                {!loading && matches.length > 0 && (
-                  <>
-                    <div className='flex items-center gap-2 px-4 py-3 bg-[#0d0d0d] border border-[#222] rounded-xl mb-4 text-[#888] text-sm'>
-                      <span
-                        className='w-2 h-2 rounded-full animate-pulse flex-shrink-0'
-                        style={{ background: ACCENT }}
-                      />
-                      Your changes to this match are pushed live instantly.
-                    </div>
 
-                    <div className='space-y-2'>
-                      <Label className='text-[13px] text-[#666]'>Match</Label>
-                      <Select
-                        value={String(selectedMatchId)}
-                        onValueChange={(v) => setSelectedMatchId(Number(v))}
-                      >
-                        <SelectTrigger className='w-full bg-[#0d0d0d] border-[#222] text-[15px] h-11'>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className='bg-[#111] border-[#222]'>
-                          {matches.map((m) => (
-                            <SelectItem
-                              key={m.id}
-                              value={String(m.id)}
-                              className='text-[14px]'
-                            >
-                              <div className='flex items-center gap-2'>
-                                {isInProgress(m) && (
-                                  <span
-                                    className='w-1.5 h-1.5 rounded-full inline-block flex-shrink-0'
-                                    style={{ background: ACCENT }}
-                                  />
-                                )}
-                                #{m.id} - {m.teamA ?? m.player1} vs{' '}
-                                {m.teamB ?? m.player2}
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {selectedMatch && (
-                      <>
-                        <div className='h-px bg-[#1c1c1c]' />
-                        <div className='pt-2'>
-                          {sport === 'cricket' ? (
-                            <CricketAdminForm
-                              match={selectedMatch}
-                              onSave={updateMatch}
-                            />
-                          ) : (
-                            <GenericAdminForm
-                              sport={sport}
-                              match={selectedMatch}
-                              onSave={updateMatch}
-                            />
-                          )}
-                        </div>
-                      </>
-                    )}
-
-                    {updateStatus && (
-                      <div
-                        className={`flex items-center gap-2.5 text-[14px] px-4 py-3 rounded-xl ${updateStatus.ok ? 'bg-[#0d150a]' : 'bg-[#180a0a]'}`}
-                        style={{
-                          border: `1px solid ${updateStatus.ok ? `${ACCENT}30` : '#5c1a1a'}`,
-                        }}
-                      >
-                        {updateStatus.ok ? (
-                          <CheckCircle2
-                            className='w-4 h-4'
-                            style={{ color: ACCENT }}
-                          />
-                        ) : (
-                          <XCircle
-                            className='w-4 h-4'
-                            style={{ color: '#ef4444' }}
-                          />
-                        )}
-                        <span
-                          style={{
-                            color: updateStatus.ok ? ACCENT : '#ef4444',
-                          }}
-                        >
-                          {updateStatus.msg}
-                        </span>
-                      </div>
-                    )}
-
-                    {selectedMatch && (
-                      <div className='flex justify-end'>
-                        <button
-                          onClick={() => deleteMatch(selectedMatch.id)}
-                          className='flex items-center gap-2 text-[13px] text-[#555] hover:text-red-400 transition-colors'
-                        >
-                          <Trash2 className='w-4 h-4 flex-shrink-0' />
-                          Delete this match
-                        </button>
-                      </div>
-                    )}
-                  </>
-                )}
-              </TabsContent>
-
-              <TabsContent value='create' className='mt-5 space-y-5'>
-                <div className='pt-2'>
-                  {sport === 'cricket' ? (
-                    <CricketAdminForm
-                      match={null}
-                      onSave={createMatch}
-                      isCreate
-                    />
+                  {matches.length === 0 ? (
+                    <p className='text-[15px] text-center text-[#444] py-10'>
+                      No matches yet. Create one first.
+                    </p>
                   ) : (
-                    <GenericAdminForm
-                      sport={sport}
-                      match={null}
-                      onSave={createMatch}
-                      isCreate
-                    />
+                    <Select
+                      value={String(selectedMatchId)}
+                      onValueChange={(v) => setSelectedMatchId(Number(v))}
+                    >
+                      <SelectTrigger className='w-full bg-[#0d0d0d] border-[#222] text-[15px] h-11'>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className='bg-[#111] border-[#222]'>
+                        {matches.map((m) => (
+                          <SelectItem
+                            key={m.id}
+                            value={String(m.id)}
+                            className='text-[14px]'
+                          >
+                            <div className='flex items-center gap-2'>
+                              {isInProgress(m) && (
+                                <span
+                                  className='w-1.5 h-1.5 rounded-full inline-block flex-shrink-0'
+                                  style={{ background: ACCENT }}
+                                />
+                              )}
+                              #{m.id} - {m.teamA ?? m.player1} vs{' '}
+                              {m.teamB ?? m.player2}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   )}
                 </div>
-                {createStatus && (
-                  <div
-                    className={`flex items-center gap-2.5 text-[14px] px-4 py-3 rounded-xl ${createStatus.ok ? 'bg-[#0d150a]' : 'bg-[#180a0a]'}`}
-                    style={{
-                      border: `1px solid ${createStatus.ok ? `${ACCENT}30` : '#5c1a1a'}`,
-                    }}
-                  >
-                    {createStatus.ok ? (
-                      <CheckCircle2
-                        className='w-4 h-4'
-                        style={{ color: ACCENT }}
+              )}
+
+              {/* Update form */}
+              {selectedMatch && (
+                <>
+                  <div className='h-px bg-[#1c1c1c]' />
+                  <div className='pt-2'>
+                    {sport === 'cricket' ? (
+                      <CricketAdminForm
+                        match={selectedMatch}
+                        onSave={updateMatch}
                       />
                     ) : (
-                      <XCircle
-                        className='w-4 h-4'
-                        style={{ color: '#ef4444' }}
+                      <GenericAdminForm
+                        sport={sport}
+                        match={selectedMatch}
+                        onSave={updateMatch}
                       />
                     )}
-                    <span
-                      style={{ color: createStatus.ok ? ACCENT : '#ef4444' }}
-                    >
-                      {createStatus.msg}
-                    </span>
                   </div>
-                )}
-              </TabsContent>
-            </Tabs>
+                </>
+              )}
+
+              {/* Status banner */}
+              {status && (
+                <div
+                  className={`flex items-center gap-2.5 text-[14px] px-4 py-3 rounded-xl ${status.ok ? 'bg-[#0d150a]' : 'bg-[#180a0a]'}`}
+                  style={{
+                    border: `1px solid ${status.ok ? `${ACCENT}30` : '#5c1a1a'}`,
+                  }}
+                >
+                  {status.ok ? (
+                    <CheckCircle2
+                      className='w-4 h-4'
+                      style={{ color: ACCENT }}
+                    />
+                  ) : (
+                    <XCircle className='w-4 h-4' style={{ color: '#ef4444' }} />
+                  )}
+                  <span style={{ color: status.ok ? ACCENT : '#ef4444' }}>
+                    {status.msg}
+                  </span>
+                </div>
+              )}
+
+              {/* Delete */}
+              {selectedMatch && (
+                <div className='flex justify-end'>
+                  <button
+                    onClick={() => deleteMatch(selectedMatch.id)}
+                    className='flex items-center gap-2 text-[13px] text-[#555] hover:text-red-400 transition-colors'
+                  >
+                    <Trash2 className='w-4 h-4 flex-shrink-0' />
+                    Delete this match
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </>
+      )}
+
+      {/* Create Match Modal */}
+      {showCreateModal && (
+        <CreateMatchModal
+          sport={sport}
+          onClose={() => setShowCreateModal(false)}
+          onCreate={createMatch}
+        />
       )}
     </div>
   );

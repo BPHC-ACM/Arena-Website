@@ -7,12 +7,17 @@ export function cn(...inputs: ClassValue[]) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isInProgress(match: Record<string, any>): boolean {
-  const s = String(match?.status ?? "").toLowerCase();
-  return (
-    s.length > 0 &&
-    !["won", "completed", "over", "ended", "finished", "full time"].some((w) =>
-      s.includes(w)
-    )
+  const s = String(match?.status ?? '').toLowerCase();
+  const summary = String(match?.summary ?? match?.details?.summary ?? '');
+
+  // If there's a match summary/result, it's definitely not in progress
+  if (summary.trim().length > 0) return false;
+
+  // Default to live if no status yet, as matches are typically created when they start
+  if (!s) return true;
+
+  return !['won', 'completed', 'match over', 'ended', 'finished', 'full time', 'tied', 'draw'].some(
+    (w) => s.includes(w),
   );
 }
 

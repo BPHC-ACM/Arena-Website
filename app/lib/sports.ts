@@ -79,7 +79,7 @@ export const SPORTS: SportConfig[] = [
     id: 'kabaddi',
     name: 'Kabaddi',
     shortName: 'KAB',
-    icon: 'fa-sharp fa-solid fa-person-running',
+    icon: 'fa-sharp fa-solid fa-person-walking-dashed-line-arrow-right',
     isTeamSport: true,
   },
   {
@@ -93,7 +93,7 @@ export const SPORTS: SportConfig[] = [
     id: 'carrom',
     name: 'Carrom',
     shortName: 'CAR',
-    icon: 'fa-sharp fa-solid fa-chess-board',
+    icon: 'fa-duotone fa-solid fa-draw-square',
     isTeamSport: false,
   },
   {
@@ -107,14 +107,14 @@ export const SPORTS: SportConfig[] = [
     id: 'hockey',
     name: 'Hockey',
     shortName: 'HOC',
-    icon: 'fa-sharp fa-solid fa-hockey-puck',
+    icon: 'fa-duotone fa-solid fa-field-hockey-stick-ball',
     isTeamSport: true,
   },
   {
     id: 'khokho',
     name: 'Kho Kho',
     shortName: 'KKO',
-    icon: 'fa-sharp fa-solid fa-person-running',
+    icon: 'fa-duotone fa-solid fa-people-pulling',
     isTeamSport: true,
   },
   {
@@ -142,14 +142,14 @@ export const SPORTS: SportConfig[] = [
     id: 'snooker',
     name: 'Snooker',
     shortName: 'SNK',
-    icon: 'fa-sharp fa-solid fa-billiard-cue',
+    icon: 'fa-duotone fa-solid fa-ball-pile',
     isTeamSport: false,
   },
   {
     id: 'squash',
     name: 'Squash',
     shortName: 'SQH',
-    icon: 'fa-sharp fa-solid fa-racquet',
+    icon: 'fa-duotone fa-solid fa-racquet',
     isTeamSport: false,
   },
   {
@@ -170,7 +170,7 @@ export const SPORTS: SportConfig[] = [
     id: 'throwball',
     name: 'Throwball',
     shortName: 'THB',
-    icon: 'fa-sharp fa-solid fa-volleyball',
+    icon: 'fa-duotone fa-solid fa-volleyball',
     isTeamSport: true,
   },
 ];

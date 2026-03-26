@@ -27,7 +27,7 @@ export function FrisbeeCard({ match }: { match: FrisbeeMatch }) {
       </div>
 
       {match.summary && <p className="text-sm text-center text-[#666] italic pb-1">{match.summary}</p>}
-      {status && <p className="text-xs text-center text-[#555] pt-1 border-t border-[#181818]">{status}</p>}
+      {status && <p className="text-xs text-center text-[#555] pt-1">{status}</p>}
     </div>
   );
 }

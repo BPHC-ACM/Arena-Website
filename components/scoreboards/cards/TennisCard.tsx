@@ -16,7 +16,7 @@ export function TennisCard({ match }: { match: TennisMatch }) {
       )}
 
       {/* Score table */}
-      <div className="rounded-lg bg-[#0d0d0d] border border-[#1a1a1a] overflow-hidden">
+      <div className="rounded-lg bg-[#0d0d0d] overflow-hidden">
         {/* Header */}
         <div className="grid grid-cols-[1fr_repeat(3,36px)_64px] gap-0 text-[10px] text-[#444] font-medium uppercase tracking-wider px-3 pt-2.5 pb-1.5">
           <div />

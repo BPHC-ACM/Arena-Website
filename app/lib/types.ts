@@ -55,6 +55,7 @@ export interface CricketMatch extends BaseMatch {
   scoreB: CricketScore;
   innings?: number;
   details?: CricketDetails;
+  firstFieldingTeam?: 'A' | 'B';
 }
 
 // ── Basketball ────────────────────────────────────────────────────────────────

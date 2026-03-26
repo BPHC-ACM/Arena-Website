@@ -10,6 +10,7 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 dotenv.config({ path: path.resolve(__dirname, "../.env.local") });
 
 const { initializeStore, saveSportMatches } = require("./models/matchStore");
+const { authorizeScoreUpdate } = require("./middleware/scoreAuth");
 
 const app = express();
 const server = http.createServer(app);
@@ -198,6 +199,9 @@ initializeStore().then(() => {
     });
   });
 
+  app.get("/api/auth/verify", authorizeScoreUpdate, (req, res) => {
+    res.json({ ok: true, role: req.user.role });
+  });
   app.use("/api/cricket", cricketRoutes);
   app.use("/api/basketball", basketballRoutes);
   app.use("/api/football", footballRoutes);

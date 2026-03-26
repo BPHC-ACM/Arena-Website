@@ -11,7 +11,7 @@ export function SwimmingCard({ match }: { match: SwimmingMatch }) {
 
   return (
     <div className="space-y-3">
-      <div className="rounded-lg bg-[#0d0d0d] border border-[#1a1a1a] overflow-hidden">
+      <div className="rounded-lg bg-[#0d0d0d] overflow-hidden">
         <div className="flex items-center gap-2 px-3 pt-2 pb-1">
           {distance && <span className="text-[10px] text-[#444] uppercase tracking-wider">{distance}</span>}
           {stroke && (

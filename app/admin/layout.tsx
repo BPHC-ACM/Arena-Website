@@ -52,23 +52,11 @@ export default function AdminLayout({
             <div>
               <Link
                 href='/scoreboards'
-                className='flex items-center gap-2 text-[#555] text-sm hover:text-[#888] transition-colors'
+                className='flex items-center gap-2 text-[#555] text-lg hover:text-[#888] transition-colors'
               >
                 <ChevronLeft className='w-4 h-4 mr-1' />
                 Scoreboards
               </Link>
-              <div className='mt-3 flex items-center gap-2'>
-                <ShieldHalf
-                  className='w-3.5 h-3.5 flex-shrink-0'
-                  style={{ color: ACCENT }}
-                />
-                <p
-                  className='text-[11px] font-bold tracking-[0.16em] uppercase'
-                  style={{ color: ACCENT }}
-                >
-                  Admin Panel
-                </p>
-              </div>
             </div>
             <button
               onClick={() => setMobileMenuOpen(false)}
@@ -91,23 +79,11 @@ export default function AdminLayout({
         <div className='px-5 py-5 border-b border-[#181818]'>
           <Link
             href='/scoreboards'
-            className='flex items-center gap-2 text-[#555] text-sm hover:text-[#888] transition-colors'
+            className='flex items-center gap-2 text-[#555] text-lg hover:text-[#888] transition-colors'
           >
             <ChevronLeft className='w-4 h-4 mr-1' />
             Scoreboards
           </Link>
-          <div className='mt-3 flex items-center gap-2'>
-            <ShieldHalf
-              className='w-3.5 h-3.5 flex-shrink-0'
-              style={{ color: ACCENT }}
-            />
-            <p
-              className='text-[11px] font-bold tracking-[0.16em] uppercase'
-              style={{ color: ACCENT }}
-            >
-              Admin Panel
-            </p>
-          </div>
         </div>
         <nav className='flex-1 overflow-y-auto p-2.5' data-lenis-prevent='true'>
           <AdminNavItems />

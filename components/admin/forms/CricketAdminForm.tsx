@@ -3,13 +3,6 @@
 import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { ACCENT } from '@/app/lib/sports';
 import { Delete, Save } from 'lucide-react';
@@ -29,8 +22,6 @@ const BALL_BTNS = [
   { label: 'NB', value: 'NB', color: '#facc15', bg: '#1a1400' },
   { label: 'NB+1', value: 'NB+1', color: '#facc15', bg: '#1a1400' },
 ];
-
-const STATUS_OPTS = ['Innings I', 'Innings II', 'Break', 'Completed'];
 
 // Determine if a ball counts toward the over (WD and NB don't)
 const isLegalBall = (ball: string) =>
@@ -52,7 +43,7 @@ const defaultForm = () => ({
   scoreA: { runs: 0, wickets: 0, overs: '0.0', extras: 0 },
   scoreB: { runs: 0, wickets: 0, overs: '0.0', extras: 0 },
   innings: 1,
-  status: 'Match started',
+  status: 'Innings I',
   details: {
     striker: { name: '', runs: 0, balls: 0, fours: 0, sixes: 0 },
     nonStriker: { name: '', runs: 0, balls: 0 },
@@ -61,8 +52,6 @@ const defaultForm = () => ({
     target: 0,
     crr: '',
     rrr: '',
-    partnershipRuns: 0,
-    partnershipBalls: 0,
     fallOfWickets: [] as string[],
     summary: '',
   },
@@ -145,11 +134,13 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
       let cur = next;
       for (let i = 0; i < parts.length - 1; i++) cur = cur[parts[i]] ??= {};
       cur[parts[parts.length - 1]] = value;
+      syncStatus(next);
       return next;
     });
 
   const handleTextChange = (path: string, v: string) =>
     setLocalValues((p) => ({ ...p, [iPath(path)]: v }));
+
   const handleTextBlur = (path: string) => {
     const p = iPath(path);
     const v = localValues[p];
@@ -162,7 +153,49 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
       setPatch(path, v);
     }
   };
+
   const textVal = (path: string) => localValues[iPath(path)] ?? get(path) ?? '';
+
+  const syncStatus = (next: any) => {
+    const innings = next.innings ?? 1;
+    const scoreA = next.scoreA ?? { runs: 0, wickets: 0 };
+    const scoreB = next.scoreB ?? { runs: 0, wickets: 0 };
+    const sa = scoreA.runs ?? 0;
+    const sb = scoreB.runs ?? 0;
+    const wa = scoreA.wickets ?? 0;
+    const wb = scoreB.wickets ?? 0;
+    const tA = next.teamA || 'Team A';
+    const tB = next.teamB || 'Team B';
+    const firstFielding = next.firstFieldingTeam ?? 'B';
+
+    if (innings === 1) {
+      if (wa === 10 || wb === 10) next.status = 'Break';
+      else next.status = 'Innings I';
+      const dKey = innings === 2 ? 'details2' : 'details';
+      if (next[dKey]) next[dKey].summary = '';
+      return;
+    }
+
+    // Innings 2
+    const target = (firstFielding === 'B' ? sa : sb) + 1;
+    const batting2Runs = firstFielding === 'B' ? sb : sa;
+    const batting2Wickets = firstFielding === 'B' ? wb : wa;
+    const batting2Team = firstFielding === 'B' ? tB : tA;
+    const bowling2Team = firstFielding === 'B' ? tA : tB;
+
+    let summary = '';
+    if (batting2Runs >= target) {
+      summary = `${batting2Team} won by ${10 - batting2Wickets} wickets`;
+    } else if (batting2Wickets === 10) {
+      if (batting2Runs === target - 1) summary = 'Match Tied';
+      else summary = `${bowling2Team} won by ${target - 1 - batting2Runs} runs`;
+    }
+
+    const dKey2 = innings === 2 ? 'details2' : 'details';
+    if (!next[dKey2]) next[dKey2] = {};
+    next[dKey2].summary = summary;
+    next.status = summary ? 'Completed' : 'Innings II';
+  };
 
   // Add a ball delivery + auto-update score
   const addBall = (ball: string) => {
@@ -172,14 +205,13 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
       const d = (next[dKey] ??= {});
       const balls: string[] = d.recentBalls ?? [];
       balls.push(ball);
-      // Keep only last 10 shown
       d.recentBalls = balls.slice(-10);
 
-      // Update batting score
       const runs = runsFromBall(ball);
-      const isTeamABatting = (next.innings ?? 1) === 1 
-        ? (next.firstFieldingTeam === 'B')
-        : (next.firstFieldingTeam === 'A');
+      const isTeamABatting =
+        (next.innings ?? 1) === 1
+          ? next.firstFieldingTeam === 'B'
+          : next.firstFieldingTeam === 'A';
       const inningsKey = isTeamABatting ? 'scoreA' : 'scoreB';
       const score = (next[inningsKey] ??= {
         runs: 0,
@@ -188,11 +220,7 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
         extras: 0,
       });
       score.runs = (score.runs ?? 0) + runs;
-
-      // Wicket
       if (ball === 'W') score.wickets = (score.wickets ?? 0) + 1;
-
-      // Extras
       if (
         ball.startsWith('WD') ||
         ball.startsWith('NB') ||
@@ -202,29 +230,30 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
         score.extras = (score.extras ?? 0) + 1;
       }
 
-      // Advance overs on legal balls
       if (isLegalBall(ball)) {
-        const [ov, b] = String(score.overs ?? '0.0').split('.').map(Number);
+        const [ov, b] = String(score.overs ?? '0.0')
+          .split('.')
+          .map(Number);
         const nextB = (b ?? 0) + 1;
-        const nextOvers = nextB >= 6 ? `${(ov ?? 0) + 1}.0` : `${ov ?? 0}.${nextB}`;
+        const nextOvers =
+          nextB >= 6 ? `${(ov ?? 0) + 1}.0` : `${ov ?? 0}.${nextB}`;
         score.overs = nextOvers;
-        
-        // Bowler Overs
+
         if (d.bowler) {
-          const [bov, bbb] = String(d.bowler.overs ?? '0.0').split('.').map(Number);
+          const [bov, bbb] = String(d.bowler.overs ?? '0.0')
+            .split('.')
+            .map(Number);
           const nextBbb = (bbb ?? 0) + 1;
-          d.bowler.overs = nextBbb >= 6 ? `${(bov ?? 0) + 1}.0` : `${bov ?? 0}.${nextBbb}`;
+          d.bowler.overs =
+            nextBbb >= 6 ? `${(bov ?? 0) + 1}.0` : `${bov ?? 0}.${nextBbb}`;
         }
 
-        // Partnership
-        d.partnershipBalls = (d.partnershipBalls ?? 0) + 1;
-        d.partnershipRuns = (d.partnershipRuns ?? 0) + runs;
-
-        // Auto-calculated CRR
-        const [ovFinal, bFinal] = nextOvers.split('.').map(Number);
-        const totalOversDec = ovFinal + (bFinal / 6);
-        d.crr = totalOversDec > 0 ? (score.runs / totalOversDec).toFixed(2) : "0.00";
+        const [ovFin, bFin] = nextOvers.split('.').map(Number);
+        const totalOversDec = ovFin + bFin / 6;
+        d.crr =
+          totalOversDec > 0 ? (score.runs / totalOversDec).toFixed(2) : '0.00';
       }
+      syncStatus(next);
       return next;
     });
   };
@@ -232,56 +261,65 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
   const removeBall = () =>
     updateAndSave((prev: any) => {
       const next = JSON.parse(JSON.stringify(prev));
-      const dKey = (next.innings === 2) ? 'details2' : 'details';
+      const dKey = next.innings === 2 ? 'details2' : 'details';
       const balls: string[] = next[dKey]?.recentBalls ?? [];
       if (balls.length === 0) return next;
-      
+
       const ball = balls[balls.length - 1];
       next[dKey].recentBalls = balls.slice(0, -1);
 
-      // Revert score
       const runs = runsFromBall(ball);
-      const isTeamABatting = (next.innings ?? 1) === 1 
-        ? (next.firstFieldingTeam === 'B')
-        : (next.firstFieldingTeam === 'A');
+      const isTeamABatting =
+        (next.innings ?? 1) === 1
+          ? next.firstFieldingTeam === 'B'
+          : next.firstFieldingTeam === 'A';
       const inningsKey = isTeamABatting ? 'scoreA' : 'scoreB';
       const score = next[inningsKey];
       if (!score) return next;
 
       score.runs = Math.max(0, (score.runs ?? 0) - runs);
       if (ball === 'W') score.wickets = Math.max(0, (score.wickets ?? 0) - 1);
-      if (ball.startsWith('WD') || ball.startsWith('NB') || ball === 'LB' || ball === 'B') {
+      if (
+        ball.startsWith('WD') ||
+        ball.startsWith('NB') ||
+        ball === 'LB' ||
+        ball === 'B'
+      ) {
         score.extras = Math.max(0, (score.extras ?? 0) - 1);
       }
 
       const d = next[dKey];
       if (isLegalBall(ball)) {
-        // Devance overs
-        const [ov, b] = String(score.overs ?? '0.0').split('.').map(Number);
-        const nextOvers = b === 0 ? (ov > 0 ? `${ov - 1}.5` : '0.0') : `${ov}.${b - 1}`;
+        const [ov, b] = String(score.overs ?? '0.0')
+          .split('.')
+          .map(Number);
+        const nextOvers =
+          b === 0 ? (ov > 0 ? `${ov - 1}.5` : '0.0') : `${ov}.${b - 1}`;
         score.overs = nextOvers;
 
-        // Bowler Overs
         if (d.bowler) {
-          const [bov, bbb] = String(d.bowler.overs ?? '0.0').split('.').map(Number);
-          d.bowler.overs = bbb === 0 ? (bov > 0 ? `${bov - 1}.5` : '0.0') : `${bov}.${bbb - 1}`;
+          const [bov, bbb] = String(d.bowler.overs ?? '0.0')
+            .split('.')
+            .map(Number);
+          d.bowler.overs =
+            bbb === 0
+              ? bov > 0
+                ? `${bov - 1}.5`
+                : '0.0'
+              : `${bov}.${bbb - 1}`;
         }
 
-        d.partnershipBalls = Math.max(0, (d.partnershipBalls ?? 0) - 1);
-        d.partnershipRuns = Math.max(0, (d.partnershipRuns ?? 0) - runs);
-
-        // Auto-calculated CRR
-        const [ovFinal, bFinal] = nextOvers.split('.').map(Number);
-        const totalOversDec = ovFinal + (bFinal / 6);
-        d.crr = totalOversDec > 0 ? (score.runs / totalOversDec).toFixed(2) : "0.00";
+        const [ovFin, bFin] = nextOvers.split('.').map(Number);
+        const totalOversDec = ovFin + bFin / 6;
+        d.crr =
+          totalOversDec > 0 ? (score.runs / totalOversDec).toFixed(2) : '0.00';
       }
-
+      syncStatus(next);
       return next;
     });
 
   const getDKey = (f: any) => (f.innings === 2 ? 'details2' : 'details');
   const balls: string[] = form[getDKey(form)]?.recentBalls ?? [];
-
   const fp = { get, setPatch, textVal, handleTextChange, handleTextBlur };
 
   const submitForm = () => {
@@ -290,7 +328,7 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
       const parts = k.split('.');
       let cur = next;
       for (let i = 0; i < parts.length - 1; i++) cur = cur[parts[i]] ??= {};
-      if (v !== "") cur[parts[parts.length - 1]] = v;
+      if (v !== '') cur[parts[parts.length - 1]] = v;
     }
     onSave(next);
   };
@@ -303,16 +341,30 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
       </div>
 
       <div className='space-y-1.5'>
-        <Label className='text-xs text-[#888] uppercase tracking-wider font-medium'>First Fielding Team</Label>
+        <Label className='text-xs text-[#888] uppercase tracking-wider font-medium'>
+          First Fielding Team
+        </Label>
         <div className='flex gap-2'>
           {['A', 'B'].map((t) => (
             <button
               key={t}
               onClick={() => setPatch('firstFieldingTeam', t)}
               className='flex-1 h-10 rounded-lg text-sm font-semibold border transition-colors'
-              style={(form.firstFieldingTeam ?? 'B') === t ? { background: `${ACCENT}20`, borderColor: `${ACCENT}44`, color: ACCENT } : { background: '#0d0d0d', borderColor: '#222', color: '#666' }}
+              style={
+                (form.firstFieldingTeam ?? 'B') === t
+                  ? {
+                      background: `${ACCENT}20`,
+                      borderColor: `${ACCENT}44`,
+                      color: ACCENT,
+                    }
+                  : {
+                      background: '#0d0d0d',
+                      borderColor: '#222',
+                      color: '#666',
+                    }
+              }
             >
-              {t === 'A' ? (form.teamA || 'Team A') : (form.teamB || 'Team B')}
+              {t === 'A' ? form.teamA || 'Team A' : form.teamB || 'Team B'}
             </button>
           ))}
         </div>
@@ -327,7 +379,8 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
             {form.teamA || 'Team A'}
           </p>
           <p className='font-mono text-3xl font-extrabold text-white'>
-            {form.scoreA?.runs}/{form.scoreA?.wickets}
+            {form.scoreA?.runs}
+            {form.scoreA?.wickets === 10 ? '' : `/${form.scoreA?.wickets}`}
           </p>
           <p className='text-sm text-[#888]'>{form.scoreA?.overs} ov</p>
         </div>
@@ -336,7 +389,8 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
             {form.teamB || 'Team B'}
           </p>
           <p className='font-mono text-3xl font-extrabold text-white'>
-            {form.scoreB?.runs}/{form.scoreB?.wickets}
+            {form.scoreB?.runs}
+            {form.scoreB?.wickets === 10 ? '' : `/${form.scoreB?.wickets}`}
           </p>
           <p className='text-sm text-[#888]'>{form.scoreB?.overs} ov</p>
         </div>
@@ -377,42 +431,48 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
 
       {/* Ball-by-ball */}
       <div className='space-y-3'>
-        {/* Current over display */}
-        <div className='flex items-center gap-2 min-h-[36px] overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
-          {balls.length === 0 ? (
-            <span className='text-sm text-[#444]'>No balls recorded yet</span>
-          ) : (
-            balls.map((b, i) => (
-              <span
-                key={i}
-                className='w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold font-mono flex-shrink-0'
-                style={{
-                  background:
-                    b === 'W'
-                      ? '#3a0808'
-                      : b.startsWith('WD') || b.startsWith('NB')
-                        ? '#1a1400'
-                        : b === '4' || b === '6'
-                          ? '#0d1a0a'
-                          : '#1e1e1e',
-                  color:
-                    b === 'W'
-                      ? '#ef4444'
-                      : b.startsWith('WD') || b.startsWith('NB')
-                        ? '#facc15'
-                        : b === '4' || b === '6'
-                          ? ACCENT
-                          : '#ccc',
-                  border: '1px solid #2a2a2a',
-                }}
-              >
-                {b}
-              </span>
-            ))
-          )}
+        <div
+          className='overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'
+          style={{ direction: 'rtl' }}
+        >
+          <div
+            className='flex items-center gap-2 min-h-[36px] w-max mr-auto'
+            style={{ direction: 'ltr' }}
+          >
+            {balls.length === 0 ? (
+              <span className='text-sm text-[#444]'>No balls recorded yet</span>
+            ) : (
+              balls.map((b, i) => (
+                <span
+                  key={i}
+                  className='w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold font-mono flex-shrink-0'
+                  style={{
+                    background:
+                      b === 'W'
+                        ? '#3a0808'
+                        : b.startsWith('WD') || b.startsWith('NB')
+                          ? '#1a1400'
+                          : b === '4' || b === '6'
+                            ? '#0d1a0a'
+                            : '#1e1e1e',
+                    color:
+                      b === 'W'
+                        ? '#ef4444'
+                        : b.startsWith('WD') || b.startsWith('NB')
+                          ? '#facc15'
+                          : b === '4' || b === '6'
+                            ? ACCENT
+                            : '#ccc',
+                    border: '1px solid #2a2a2a',
+                  }}
+                >
+                  {b}
+                </span>
+              ))
+            )}
+          </div>
         </div>
 
-        {/* Ball buttons */}
         <div className='grid grid-cols-7 gap-1.5'>
           {BALL_BTNS.map((btn) => (
             <button
@@ -432,12 +492,10 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
             onClick={removeBall}
             className='h-11 rounded-lg text-sm border border-[#2a2a2a] bg-[#161616] text-[#555] transition-all hover:text-[#888] flex items-center justify-center'
           >
-            <Delete className="w-4 h-4 flex-shrink-0" />
+            <Delete className='w-4 h-4 flex-shrink-0' />
           </button>
         </div>
       </div>
-
-      <Separator className='bg-[#1e1e1e]' />
 
       <Separator className='bg-[#1e1e1e]' />
 
@@ -446,7 +504,9 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
         <div className='grid grid-cols-3 gap-3'>
           <TF label='Target' path='details2.target' type='number' {...fp} />
           <div className='space-y-1.5'>
-            <Label className='text-xs text-[#888] uppercase tracking-wider font-medium'>CRR</Label>
+            <Label className='text-xs text-[#888] uppercase tracking-wider font-medium'>
+              CRR
+            </Label>
             <div className='h-9 flex items-center px-3 bg-[#0d0d0d] border border-[#222] rounded-md text-sm text-[#aaa] font-mono'>
               {get('details2.crr') || '0.00'}
             </div>
@@ -455,56 +515,14 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
         </div>
       ) : (
         <div className='space-y-1.5 max-w-[120px]'>
-          <Label className='text-xs text-[#888] uppercase tracking-wider font-medium'>CRR</Label>
+          <Label className='text-xs text-[#888] uppercase tracking-wider font-medium'>
+            CRR
+          </Label>
           <div className='h-9 flex items-center px-3 bg-[#0d0d0d] border border-[#222] rounded-md text-sm text-[#aaa] font-mono'>
             {get('details.crr') || '0.00'}
           </div>
         </div>
       )}
-
-      {/* Status dropdown */}
-      <div className='space-y-1.5 w-full'>
-        <Label className='text-xs text-[#888] uppercase tracking-wider font-medium'>
-          Match Status
-        </Label>
-        <Select
-          value={STATUS_OPTS.includes(form.status) ? form.status : 'Innings I'}
-          onValueChange={(v) => {
-            if (v === 'Completed') {
-              updateAndSave((prev) => {
-                const next = JSON.parse(JSON.stringify(prev));
-                next.status = v;
-                const sa = next.scoreA?.runs ?? 0;
-                const sb = next.scoreB?.runs ?? 0;
-                const tA = next.teamA || 'Team A';
-                const tB = next.teamB || 'Team B';
-                let sum = '';
-                if (sa === sb) sum = 'Match Tied';
-                else if (sb > sa)
-                  sum = `${tB} won by ${10 - (next.scoreB?.wickets ?? 0)} wickets`;
-                else sum = `${tA} won by ${sa - sb} runs`;
-                const dKey = next.innings === 2 ? 'details2' : 'details';
-                if (!next[dKey]) next[dKey] = {};
-                next[dKey].summary = sum;
-                return next;
-              });
-            } else {
-              setPatch('status', v);
-            }
-          }}
-        >
-          <SelectTrigger className='w-full bg-[#0d0d0d] border-[#222] text-sm h-10'>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className='bg-[#111] border-[#222]'>
-            {STATUS_OPTS.map((s) => (
-              <SelectItem key={s} value={s}>
-                {s}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
 
       {isCreate && (
         <button
@@ -512,7 +530,7 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
           className='w-full h-12 rounded-xl text-sm font-bold gap-2 text-black flex items-center justify-center transition-opacity hover:opacity-90'
           style={{ background: ACCENT }}
         >
-          <Save className="w-4 h-4 mr-2 flex-shrink-0" />
+          <Save className='w-4 h-4 mr-2 flex-shrink-0' />
           Create Match
         </button>
       )}

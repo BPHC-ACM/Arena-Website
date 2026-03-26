@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import SmoothScroll from "@/components/SmoothScroll";
-import GlobalNav from "@/components/GlobalNav";
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
+import SmoothScroll from '@/components/SmoothScroll';
+import GlobalNav from '@/components/GlobalNav';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -15,15 +15,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Arena 2026 | South India\'s Largest Sports Festival',
-  description: 'Official website for Arena 2026, the annual sports fest of BITS Pilani Hyderabad Campus.',
+  title: "Arena 2026 | South India's Largest Sports Festival",
+  description:
+    'Official website for Arena 2026, the annual sports fest of BITS Pilani Hyderabad Campus.',
   icons: {
     icon: '/arena%20logo_%202.png',
     apple: '/arena%20logo_%202.png',
   },
   openGraph: {
     title: 'Arena 2026 | BITS Pilani Hyderabad',
-    description: 'Join us at Arena 2026, South India\'s Largest Sports Festival at BITS Pilani Hyderabad Campus.',
+    description:
+      "Join us at Arena 2026, South India's Largest Sports Festival at BITS Pilani Hyderabad Campus.",
     url: 'https://arena-bitsh.com',
     siteName: 'Arena 2026',
     images: [
@@ -40,7 +42,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Arena 2026 | BITS Pilani Hyderabad',
-    description: 'South India\'s Largest Sports Festival.',
+    description: "South India's Largest Sports Festival.",
     images: ['/og-image.png'],
   },
 };
@@ -53,21 +55,66 @@ export default function RootLayout({
   return (
     <html lang='en' suppressHydrationWarning>
       <head>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/fontawesome.css" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/sharp-solid.css" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/sharp-regular.css" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/sharp-light.css" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/duotone.css" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/sharp-duotone-solid.css" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/chisel-regular.css" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/etch-solid.css" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/graphite-thin.css" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/jelly-regular.css" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/notdog-solid.css" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/slab-regular.css" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/thumbprint-light.css" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/utility-semibold.css" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/whiteboard-semibold.css" />
+        <link
+          rel='stylesheet'
+          href='https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/fontawesome.css'
+        />
+        <link
+          rel='stylesheet'
+          href='https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/sharp-solid.css'
+        />
+        <link
+          rel='stylesheet'
+          href='https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/sharp-regular.css'
+        />
+        <link
+          rel='stylesheet'
+          href='https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/sharp-light.css'
+        />
+        <link
+          rel='stylesheet'
+          href='https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/duotone.css'
+        />
+        <link
+          rel='stylesheet'
+          href='https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/sharp-duotone-solid.css'
+        />
+        <link
+          rel='stylesheet'
+          href='https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/chisel-regular.css'
+        />
+        <link
+          rel='stylesheet'
+          href='https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/etch-solid.css'
+        />
+        <link
+          rel='stylesheet'
+          href='https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/graphite-thin.css'
+        />
+        <link
+          rel='stylesheet'
+          href='https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/jelly-regular.css'
+        />
+        <link
+          rel='stylesheet'
+          href='https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/notdog-solid.css'
+        />
+        <link
+          rel='stylesheet'
+          href='https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/slab-regular.css'
+        />
+        <link
+          rel='stylesheet'
+          href='https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/thumbprint-light.css'
+        />
+        <link
+          rel='stylesheet'
+          href='https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/utility-semibold.css'
+        />
+        <link
+          rel='stylesheet'
+          href='https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/whiteboard-semibold.css'
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

@@ -26,7 +26,7 @@ export function VolleyballCard({ match }: { match: VolleyballMatch }) {
 
       {/* Set history */}
       {setsTeamA && setsTeamA.length > 0 && (
-        <div className="rounded-lg bg-[#0d0d0d] border border-[#1a1a1a] p-3">
+        <div className="rounded-lg bg-[#0d0d0d] p-3">
           <p className="text-[10px] text-[#555] uppercase tracking-wider mb-2">Set History</p>
           <div className="flex gap-3">
             {setsTeamA.map((s, i) => (
@@ -41,7 +41,7 @@ export function VolleyballCard({ match }: { match: VolleyballMatch }) {
       )}
 
       {match.summary && <p className="text-sm text-center text-[#666] italic pb-1">{match.summary}</p>}
-      {status && <p className="text-xs text-center text-[#555] pt-1 border-t border-[#181818]">{status}</p>}
+      {status && <p className="text-xs text-center text-[#555] pt-1">{status}</p>}
     </div>
   );
 }
