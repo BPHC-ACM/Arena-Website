@@ -3,8 +3,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { SPORTS, ACCENT } from '@/app/lib/sports';
 import { cn } from '@/app/lib/utils';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ShieldHalf, Menu, ChevronLeft, X } from 'lucide-react';
+import { useFavourites } from '@/app/lib/useFavourites';
 
 export default function AdminLayout({
   children,
@@ -107,38 +108,91 @@ export default function AdminLayout({
 }
 function AdminNavItems({ onClick }: { onClick?: () => void }) {
   const pathname = usePathname();
+  const { favourites, isLoaded } = useFavourites();
+
+  const sortedSports = useMemo(() => {
+    if (!isLoaded) return SPORTS;
+    return [...SPORTS].sort((a, b) => {
+      const aFav = favourites.includes(a.id);
+      const bFav = favourites.includes(b.id);
+      if (aFav && !bFav) return -1;
+      if (!aFav && bFav) return 1;
+      return 0; // maintain original SPORTS order otherwise
+    });
+  }, [favourites, isLoaded]);
+
+  const { favouriteSports, otherSports } = useMemo(() => {
+    const favs = sortedSports.filter(s => favourites.includes(s.id));
+    const nonFavs = sortedSports.filter(s => !favourites.includes(s.id));
+    return { favouriteSports: favs, otherSports: nonFavs };
+  }, [sortedSports, favourites]);
+
   return (
     <>
-      {SPORTS.map((sport) => {
+      {favouriteSports.map((sport) => {
         const active = pathname === `/admin/${sport.id}`;
         return (
-          <Link
+          <AdminNavLink
             key={sport.id}
-            href={`/admin/${sport.id}`}
+            sport={sport}
+            active={active}
             onClick={onClick}
-            className={cn(
-              'flex items-center gap-3 px-3.5 py-3 rounded-md mb-0.5 text-[15px] transition-all',
-              active
-                ? 'border font-semibold'
-                : 'text-[#666] hover:text-[#ccc] hover:bg-[#161616] border border-transparent',
-            )}
-            style={
-              active
-                ? {
-                    background: 'rgba(87,166,57,0.12)',
-                    border: '1px solid rgba(87,166,57,0.22)',
-                    color: ACCENT,
-                  }
-                : {}
-            }
-          >
-            <i
-              className={`${sport.icon} text-base w-4 text-center flex-shrink-0`}
-            ></i>
-            {sport.name}
-          </Link>
+          />
+        );
+      })}
+
+      {favouriteSports.length > 0 && otherSports.length > 0 && (
+        <div className='my-4 border-t border-[#1c1c1c]' />
+      )}
+
+      {otherSports.map((sport) => {
+        const active = pathname === `/admin/${sport.id}`;
+        return (
+          <AdminNavLink
+            key={sport.id}
+            sport={sport}
+            active={active}
+            onClick={onClick}
+          />
         );
       })}
     </>
+  );
+}
+
+function AdminNavLink({ 
+  sport, 
+  active, 
+  onClick 
+}: { 
+  sport: typeof SPORTS[0]; 
+  active: boolean; 
+  onClick?: () => void 
+}) {
+  return (
+    <Link
+      href={`/admin/${sport.id}`}
+      onClick={onClick}
+      className={cn(
+        'flex items-center gap-3 px-3.5 py-3 rounded-md mb-0.5 text-[15px] transition-all',
+        active
+          ? 'border font-semibold'
+          : 'text-[#666] hover:text-[#ccc] hover:bg-[#161616] border border-transparent',
+      )}
+      style={
+        active
+          ? {
+              background: 'rgba(87,166,57,0.12)',
+              border: '1px solid rgba(87,166,57,0.22)',
+              color: ACCENT,
+            }
+          : {}
+      }
+    >
+      <i
+        className={`${sport.icon} text-base w-4 text-center flex-shrink-0`}
+      ></i>
+      <span className="truncate">{sport.name}</span>
+    </Link>
   );
 }

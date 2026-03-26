@@ -4,8 +4,10 @@ import { use } from 'react';
 import { useMatchStream } from '@/app/lib/useMatchStream';
 import { SPORTS, getSport, ACCENT, type SportId } from '@/app/lib/sports';
 import { MatchCard } from '@/components/scoreboards/MatchCard';
-import { AlertTriangle, Loader2 } from 'lucide-react';
+import { AlertTriangle, Loader2, Star } from 'lucide-react';
 import Image from 'next/image';
+import { useFavourites } from '@/app/lib/useFavourites';
+import { cn } from '@/app/lib/utils';
 
 export default function SportPage({
   params,
@@ -18,8 +20,10 @@ export default function SportPage({
 }
 
 function SportPageInner({ sport }: { sport: SportId }) {
-  const { matches, loading, error, wsConnected } = useMatchStream(sport);
+  const { matches, loading, error } = useMatchStream(sport);
+  const { toggleFavourite, isFavourite } = useFavourites();
   const config = getSport(sport);
+  const isFav = isFavourite(sport);
 
   return (
     <div className='relative px-4 py-6 md:px-10 md:py-10 max-w-3xl mx-auto'>
@@ -33,7 +37,7 @@ function SportPageInner({ sport }: { sport: SportId }) {
           alt=''
           width={420}
           height={420}
-          className='w-[420px] max-w-[60vw] opacity-[0.3] grayscale select-none'
+          className='w-[320px] max-w-[60vw] opacity-[0.3] grayscale select-none'
         />
       </div>
 
@@ -45,8 +49,20 @@ function SportPageInner({ sport }: { sport: SportId }) {
             style={{ color: ACCENT }}
           ></i>
         </div>
-        <div className='flex-1'>
+        <div className='flex-1 flex items-center justify-between'>
           <h1 className='text-2xl font-bold text-white'>{config.name}</h1>
+          <button
+            onClick={() => toggleFavourite(sport)}
+            className={cn(
+              "p-2.5 rounded-xl border transition-all active:scale-95",
+              isFav 
+                ? "bg-yellow-500/10 border-yellow-500/20 text-yellow-500" 
+                : "bg-[#161616] border-[#1e1e1e] text-[#444] hover:text-[#888]"
+            )}
+            title={isFav ? "Remove from favorites" : "Add to favorites"}
+          >
+            <Star className={cn("w-5 h-5", isFav && "fill-current")} />
+          </button>
         </div>
       </div>
 

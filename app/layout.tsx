@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import SmoothScroll from '@/components/SmoothScroll';
 import GlobalNav from '@/components/GlobalNav';
+import { FavouritesProvider } from '@/app/lib/FavouritesContext';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -120,8 +121,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SmoothScroll>
-          <GlobalNav />
-          {children}
+          <FavouritesProvider>
+            <GlobalNav />
+            {children}
+          </FavouritesProvider>
         </SmoothScroll>
       </body>
     </html>

@@ -19,7 +19,10 @@ import {
   Plus,
   Trash2,
   CheckCircle2,
+  Star,
 } from 'lucide-react';
+import { useFavourites } from '@/app/lib/useFavourites';
+import { cn } from '@/app/lib/utils';
 import {
   Select,
   SelectContent,
@@ -44,6 +47,8 @@ export default function AdminSportPage({
 function AdminPageInner({ sport }: { sport: SportId }) {
   const config = getSport(sport);
   const { matches, loading } = useMatchStream(sport);
+  const { toggleFavourite, isFavourite } = useFavourites();
+  const isFav = isFavourite(sport);
 
   const [token, setToken] = useState('');
   const [mounted, setMounted] = useState(false);
@@ -157,6 +162,18 @@ function AdminPageInner({ sport }: { sport: SportId }) {
             <h1 className='text-2xl font-bold text-white'>{config.name}</h1>
           </div>
         </div>
+        <button
+          onClick={() => toggleFavourite(sport)}
+          className={cn(
+            "p-2.5 rounded-xl border transition-all active:scale-95",
+            isFav
+              ? "bg-yellow-500/10 border-yellow-500/20 text-yellow-500"
+              : "bg-[#161616] border-[#1e1e1e] text-[#444] hover:text-[#888]"
+          )}
+          title={isFav ? "Remove from favorites" : "Add to favorites"}
+        >
+          <Star className={cn("w-4 h-4", isFav && "fill-current")} />
+        </button>
         {token && (
           <button
             onClick={() => {
@@ -238,14 +255,18 @@ function AdminPageInner({ sport }: { sport: SportId }) {
               {!loading && (
                 <div className='space-y-2'>
                   <div className='flex items-center justify-between'>
-                    <Label className='text-md text-[#666]'>Score Updates</Label>
+                    <Label
+                      className='text-[13px] font-bold tracking-widest uppercase'
+                      style={{ color: ACCENT }}
+                    >
+                      Score Updates
+                    </Label>
                     <button
                       onClick={() => setShowCreateModal(true)}
                       className='flex items-center gap-1.5 text-[13px] font-semibold px-3 py-1.5 rounded-lg border transition-colors'
                       style={{
                         color: ACCENT,
-                        borderColor: `${ACCENT}44`,
-                        background: `${ACCENT}12`,
+                        borderColor: `${ACCENT}00`,
                       }}
                     >
                       <Plus className='w-3.5 h-3.5 flex-shrink-0' />
