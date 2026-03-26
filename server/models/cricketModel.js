@@ -1,7 +1,7 @@
-const { getInitialMatches, getNextCounter } = require("./seedMatches");
+const { getNextCounter } = require("./modelUtils");
 const { getInitialSportMatches, saveSportMatches } = require("./matchStore");
 
-let cricketMatches = getInitialSportMatches("cricket", getInitialMatches("cricket"));
+let cricketMatches = getInitialSportMatches("cricket");
 let matchIdCounter = getNextCounter(cricketMatches);
 
 const getCricketMatches = () => cricketMatches;
@@ -11,10 +11,15 @@ const getCricketMatchById = (id) => {
 };
 
 const createCricketMatch = (data) => {
+  const parsedTotalOvers = Number(data.totalOvers);
   const newMatch = {
     id: matchIdCounter++,
     teamA: data.teamA || "",
     teamB: data.teamB || "",
+    totalOvers:
+      Number.isFinite(parsedTotalOvers) && parsedTotalOvers > 0
+        ? parsedTotalOvers
+        : 20,
     scoreA: data.scoreA || {
       runs: 0,
       wickets: 0,
@@ -48,7 +53,19 @@ const createCricketMatch = (data) => {
 const updateCricketMatch = (id, data) => {
   const index = cricketMatches.findIndex((match) => match.id === parseInt(id));
   if (index !== -1) {
-    cricketMatches[index] = { ...cricketMatches[index], ...data };
+    const parsedTotalOvers = Number(data.totalOvers);
+    const normalizedData =
+      data.totalOvers === undefined
+        ? data
+        : {
+            ...data,
+            totalOvers:
+              Number.isFinite(parsedTotalOvers) && parsedTotalOvers > 0
+                ? parsedTotalOvers
+                : cricketMatches[index].totalOvers || 20,
+          };
+
+    cricketMatches[index] = { ...cricketMatches[index], ...normalizedData };
     saveSportMatches("cricket", cricketMatches);
     return cricketMatches[index];
   }

@@ -53,6 +53,7 @@ export interface CricketMatch extends BaseMatch {
   teamB: string;
   scoreA: CricketScore;
   scoreB: CricketScore;
+  totalOvers?: number;
   innings?: number;
   details?: CricketDetails;
   firstFieldingTeam?: 'A' | 'B';

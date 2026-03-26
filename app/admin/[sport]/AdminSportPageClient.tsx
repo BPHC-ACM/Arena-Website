@@ -171,17 +171,28 @@ export function AdminSportPageClient({ sport }: { sport: SportId }) {
                     >
                       Score Updates
                     </Label>
-                    <button
-                      onClick={() => setShowCreateModal(true)}
-                      className='flex items-center gap-1.5 text-[13px] font-semibold px-3 py-1.5 rounded-lg border transition-colors'
-                      style={{
-                        color: ACCENT,
-                        borderColor: `${ACCENT}00`,
-                      }}
-                    >
-                      <Plus className='w-3.5 h-3.5 flex-shrink-0' />
-                      New Match
-                    </button>
+                    <div className='flex items-center gap-2'>
+                      {selectedMatch && (
+                        <button
+                          onClick={() => deleteMatch(selectedMatch.id)}
+                          className='flex items-center gap-1.5 text-[13px] font-semibold px-3 py-1.5 rounded-lg border transition-colors text-red-400/90 hover:text-red-300 border-red-900/30 hover:border-red-700/40'
+                        >
+                          <Trash2 className='w-3.5 h-3.5 shrink-0' />
+                          Delete Match
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setShowCreateModal(true)}
+                        className='flex items-center gap-1.5 text-[13px] font-semibold px-3 py-1.5 rounded-lg border transition-colors'
+                        style={{
+                          color: ACCENT,
+                          borderColor: `${ACCENT}00`,
+                        }}
+                      >
+                        <Plus className='w-3.5 h-3.5 flex-shrink-0' />
+                        New Match
+                      </button>
+                    </div>
                   </div>
 
                   {matches.length === 0 ? (

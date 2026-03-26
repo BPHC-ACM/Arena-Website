@@ -1,8 +1,12 @@
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
-  ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api`
-  : undefined;
+const rawApiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
 
-const DEFAULT_WS_URL = process.env.NEXT_PUBLIC_WS_URL || "";
+export const API_BASE_URL = rawApiBaseUrl
+  ? rawApiBaseUrl.endsWith('/api')
+    ? rawApiBaseUrl
+    : `${rawApiBaseUrl}/api`
+  : "http://localhost:3001/api";
+
+const DEFAULT_WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:3001";
 
 export const getWebSocketUrl = () => {
   const baseUrl = DEFAULT_WS_URL;

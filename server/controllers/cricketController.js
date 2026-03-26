@@ -27,6 +27,13 @@ const createMatch = (req, res) => {
     return res.status(400).json({ error: "Team names are required" });
   }
 
+  if (
+    data.totalOvers !== undefined &&
+    (!Number.isFinite(Number(data.totalOvers)) || Number(data.totalOvers) <= 0)
+  ) {
+    return res.status(400).json({ error: "totalOvers must be a positive number" });
+  }
+
   const match = createCricketMatch(data);
   emitCricketUpdate(getCricketMatches());
   res.status(201).json(match);
@@ -34,6 +41,13 @@ const createMatch = (req, res) => {
 
 const updateMatch = (req, res) => {
   const data = req.body;
+
+  if (
+    data.totalOvers !== undefined &&
+    (!Number.isFinite(Number(data.totalOvers)) || Number(data.totalOvers) <= 0)
+  ) {
+    return res.status(400).json({ error: "totalOvers must be a positive number" });
+  }
 
   if (data.scoreA) {
     if (

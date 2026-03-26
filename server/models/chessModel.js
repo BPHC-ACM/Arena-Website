@@ -1,7 +1,7 @@
-const { getInitialMatches, getNextCounter } = require("./seedMatches");
+const { getNextCounter } = require("./modelUtils");
 const { getInitialSportMatches, saveSportMatches } = require("./matchStore");
 
-let chessMatches = getInitialSportMatches("chess", getInitialMatches("chess"));
+let chessMatches = getInitialSportMatches("chess");
 let matchIdCounter = getNextCounter(chessMatches);
 
 const getChessMatches = () => chessMatches;

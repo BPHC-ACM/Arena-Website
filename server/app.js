@@ -5,9 +5,9 @@ const path = require('path');
 const dotenv = require('dotenv');
 const socketHandler = require('./socket/socketHandler');
 
-dotenv.config();
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
-dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
+dotenv.config({ quiet: true });
+dotenv.config({ path: path.resolve(__dirname, '../.env'), quiet: true });
+dotenv.config({ path: path.resolve(__dirname, '../.env.local'), quiet: true });
 
 const { initializeStore, saveSportMatches } = require('./models/matchStore');
 const { authorizeScoreUpdate } = require('./middleware/scoreAuth');
@@ -271,7 +271,7 @@ initializeStore().then(() => {
     });
   });
 
-  const PORT = process.env.PORT;
+  const PORT = Number(process.env.PORT) || 3001;
 
   server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

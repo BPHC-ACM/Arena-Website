@@ -4,7 +4,12 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
 // Only init client if valid URL
-const hasValidConfig = supabaseUrl.includes("supabase.co") && supabaseKey !== "placeholder-key";
+const hasValidConfig =
+  typeof supabaseUrl === "string" &&
+  supabaseUrl.includes("supabase.co") &&
+  typeof supabaseKey === "string" &&
+  supabaseKey.length > 0 &&
+  supabaseKey !== "placeholder-key";
 const supabase = hasValidConfig ? createClient(supabaseUrl, supabaseKey) : null;
 
 let inMemoryStore = {};
@@ -34,7 +39,7 @@ const initializeStore = async () => {
   }
 };
 
-const getInitialSportMatches = (sport, seedData) => {
+const getInitialSportMatches = (sport) => {
   // If the DB already had records, return a deep copy to prevent mutation bugs
   if (Array.isArray(inMemoryStore[sport]) && inMemoryStore[sport].length > 0) {
     return JSON.parse(JSON.stringify(inMemoryStore[sport]));

@@ -19,8 +19,14 @@ const BALL_BTNS = [
   { label: 'W', value: 'W', color: '#ef4444', bg: '#1a0808' },
   { label: 'WD', value: 'WD', color: '#facc15', bg: '#1a1400' },
   { label: 'WD+1', value: 'WD+1', color: '#facc15', bg: '#1a1400' },
+  { label: 'WD+2', value: 'WD+2', color: '#facc15', bg: '#1a1400' },
+  { label: 'WD+3', value: 'WD+3', color: '#facc15', bg: '#1a1400' },
+  { label: 'WD+4', value: 'WD+4', color: '#facc15', bg: '#1a1400' },
   { label: 'NB', value: 'NB', color: '#facc15', bg: '#1a1400' },
   { label: 'NB+1', value: 'NB+1', color: '#facc15', bg: '#1a1400' },
+  { label: 'NB+2', value: 'NB+2', color: '#facc15', bg: '#1a1400' },
+  { label: 'NB+3', value: 'NB+3', color: '#facc15', bg: '#1a1400' },
+  { label: 'NB+4', value: 'NB+4', color: '#facc15', bg: '#1a1400' },
 ];
 
 // Determine if a ball counts toward the over (WD and NB don't)
@@ -36,10 +42,22 @@ const runsFromBall = (ball: string): number => {
   return 0; // W, LB, B, etc.
 };
 
+const extrasFromBall = (ball: string): number => {
+  if (ball.startsWith('WD+') || ball.startsWith('NB+')) {
+    const extraRuns = parseInt(ball.slice(3), 10);
+    return 1 + (Number.isNaN(extraRuns) ? 0 : extraRuns);
+  }
+  if (ball === 'WD' || ball === 'NB' || ball === 'LB' || ball === 'B') {
+    return 1;
+  }
+  return 0;
+};
+
 const defaultForm = () => ({
   teamA: '',
   teamB: '',
   firstFieldingTeam: 'B',
+  totalOvers: 20,
   scoreA: { runs: 0, wickets: 0, overs: '0.0', extras: 0 },
   scoreB: { runs: 0, wickets: 0, overs: '0.0', extras: 0 },
   innings: 1,
@@ -97,6 +115,38 @@ const TF = ({
     )}
   </div>
 );
+
+const normalizeFieldingTeam = (
+  raw: unknown,
+  teamA: string,
+  teamB: string,
+): 'A' | 'B' => {
+  if (raw === 'A' || raw === 'B') return raw;
+  if (typeof raw !== 'string') return 'B';
+
+  const value = raw.trim().toLowerCase();
+  if (value === 'team a') return 'A';
+  if (value === 'team b') return 'B';
+  if (teamA && value === teamA.trim().toLowerCase()) return 'A';
+  if (teamB && value === teamB.trim().toLowerCase()) return 'B';
+
+  return 'B';
+};
+
+const getBattingTeamKey = (
+  innings: number,
+  firstFieldingTeam: 'A' | 'B',
+): 'A' | 'B' => {
+  if (innings === 1) return firstFieldingTeam === 'A' ? 'B' : 'A';
+  return firstFieldingTeam;
+};
+
+const oversToBalls = (overs: unknown): number => {
+  const [fullOversRaw, ballsRaw] = String(overs ?? '0.0').split('.');
+  const fullOvers = Number(fullOversRaw) || 0;
+  const balls = Number(ballsRaw) || 0;
+  return fullOvers * 6 + Math.min(Math.max(balls, 0), 5);
+};
 
 export function CricketAdminForm({ match, onSave, isCreate }: Props) {
   const [form, setForm] = useState<any>(match ?? defaultForm());
@@ -166,10 +216,21 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
     const wb = scoreB.wickets ?? 0;
     const tA = next.teamA || 'Team A';
     const tB = next.teamB || 'Team B';
-    const firstFielding = next.firstFieldingTeam ?? 'B';
+    const firstFielding = normalizeFieldingTeam(
+      next.firstFieldingTeam,
+      tA,
+      tB,
+    );
+    next.firstFieldingTeam = firstFielding;
+    const totalOvers = Number(next.totalOvers) || 20;
+    const maxBalls = Math.max(1, Math.floor(totalOvers * 6));
 
     if (innings === 1) {
-      if (wa === 10 || wb === 10) next.status = 'Break';
+      const batting1Key = getBattingTeamKey(1, firstFielding);
+      const batting1Score = batting1Key === 'A' ? scoreA : scoreB;
+      const innings1DoneByOvers = oversToBalls(batting1Score?.overs) >= maxBalls;
+
+      if (wa === 10 || wb === 10 || innings1DoneByOvers) next.status = 'Break';
       else next.status = 'Innings I';
       const dKey = innings === 2 ? 'details2' : 'details';
       if (next[dKey]) next[dKey].summary = '';
@@ -182,11 +243,16 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
     const batting2Wickets = firstFielding === 'B' ? wb : wa;
     const batting2Team = firstFielding === 'B' ? tB : tA;
     const bowling2Team = firstFielding === 'B' ? tA : tB;
+    const batting2Score = firstFielding === 'B' ? scoreB : scoreA;
+    const innings2DoneByOvers = oversToBalls(batting2Score?.overs) >= maxBalls;
 
     let summary = '';
     if (batting2Runs >= target) {
       summary = `${batting2Team} won by ${10 - batting2Wickets} wickets`;
     } else if (batting2Wickets === 10) {
+      if (batting2Runs === target - 1) summary = 'Match Tied';
+      else summary = `${bowling2Team} won by ${target - 1 - batting2Runs} runs`;
+    } else if (innings2DoneByOvers) {
       if (batting2Runs === target - 1) summary = 'Match Tied';
       else summary = `${bowling2Team} won by ${target - 1 - batting2Runs} runs`;
     }
@@ -201,34 +267,40 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
   const addBall = (ball: string) => {
     updateAndSave((prev: any) => {
       const next = JSON.parse(JSON.stringify(prev));
+      const totalOvers = Number(next.totalOvers) || 20;
+      const maxBalls = Math.max(1, Math.floor(totalOvers * 6));
       const dKey = next.innings === 2 ? 'details2' : 'details';
       const d = (next[dKey] ??= {});
-      const balls: string[] = d.recentBalls ?? [];
-      balls.push(ball);
-      d.recentBalls = balls.slice(-10);
 
       const runs = runsFromBall(ball);
-      const isTeamABatting =
-        (next.innings ?? 1) === 1
-          ? next.firstFieldingTeam === 'B'
-          : next.firstFieldingTeam === 'A';
-      const inningsKey = isTeamABatting ? 'scoreA' : 'scoreB';
+      const normalizedFielding = normalizeFieldingTeam(
+        next.firstFieldingTeam,
+        next.teamA || '',
+        next.teamB || '',
+      );
+      next.firstFieldingTeam = normalizedFielding;
+      const battingTeamKey = getBattingTeamKey(next.innings ?? 1, normalizedFielding);
+      const inningsKey = battingTeamKey === 'A' ? 'scoreA' : 'scoreB';
       const score = (next[inningsKey] ??= {
         runs: 0,
         wickets: 0,
         overs: '0.0',
         extras: 0,
       });
+
+      const inningsDoneByOvers = oversToBalls(score.overs) >= maxBalls;
+      if (inningsDoneByOvers) {
+        syncStatus(next);
+        return next;
+      }
+
+      const balls: string[] = d.recentBalls ?? [];
+      balls.push(ball);
+      d.recentBalls = balls.slice(-10);
+
       score.runs = (score.runs ?? 0) + runs;
       if (ball === 'W') score.wickets = (score.wickets ?? 0) + 1;
-      if (
-        ball.startsWith('WD') ||
-        ball.startsWith('NB') ||
-        ball === 'LB' ||
-        ball === 'B'
-      ) {
-        score.extras = (score.extras ?? 0) + 1;
-      }
+      score.extras = (score.extras ?? 0) + extrasFromBall(ball);
 
       if (isLegalBall(ball)) {
         const [ov, b] = String(score.overs ?? '0.0')
@@ -269,24 +341,20 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
       next[dKey].recentBalls = balls.slice(0, -1);
 
       const runs = runsFromBall(ball);
-      const isTeamABatting =
-        (next.innings ?? 1) === 1
-          ? next.firstFieldingTeam === 'B'
-          : next.firstFieldingTeam === 'A';
-      const inningsKey = isTeamABatting ? 'scoreA' : 'scoreB';
+      const normalizedFielding = normalizeFieldingTeam(
+        next.firstFieldingTeam,
+        next.teamA || '',
+        next.teamB || '',
+      );
+      next.firstFieldingTeam = normalizedFielding;
+      const battingTeamKey = getBattingTeamKey(next.innings ?? 1, normalizedFielding);
+      const inningsKey = battingTeamKey === 'A' ? 'scoreA' : 'scoreB';
       const score = next[inningsKey];
       if (!score) return next;
 
       score.runs = Math.max(0, (score.runs ?? 0) - runs);
       if (ball === 'W') score.wickets = Math.max(0, (score.wickets ?? 0) - 1);
-      if (
-        ball.startsWith('WD') ||
-        ball.startsWith('NB') ||
-        ball === 'LB' ||
-        ball === 'B'
-      ) {
-        score.extras = Math.max(0, (score.extras ?? 0) - 1);
-      }
+      score.extras = Math.max(0, (score.extras ?? 0) - extrasFromBall(ball));
 
       const d = next[dKey];
       if (isLegalBall(ball)) {
@@ -368,6 +436,10 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
             </button>
           ))}
         </div>
+      </div>
+
+      <div className='space-y-1.5 max-w-40'>
+        <TF label='Total Overs' path='totalOvers' type='number' {...fp} />
       </div>
 
       <Separator className='bg-[#1e1e1e]' />

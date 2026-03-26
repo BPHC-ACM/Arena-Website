@@ -32,17 +32,31 @@ const PARTICIPANT_FIELDS: Record<SportId, [string, string, string, string]> = {
 interface Props {
   sport: SportId;
   onClose: () => void;
-  onCreate: (data: Record<string, string>) => void;
+  onCreate: (data: Record<string, string | number>) => void;
 }
 
 export function CreateMatchModal({ sport, onClose, onCreate }: Props) {
   const [labelA, keyA, labelB, keyB] = PARTICIPANT_FIELDS[sport];
   const [valA, setValA] = useState('');
   const [valB, setValB] = useState('');
+  const [totalOvers, setTotalOvers] = useState('20');
 
   const handleCreate = () => {
     if (!valA.trim() || !valB.trim()) return;
-    onCreate({ [keyA]: valA.trim(), [keyB]: valB.trim() });
+    const payload: Record<string, string | number> = {
+      [keyA]: valA.trim(),
+      [keyB]: valB.trim(),
+    };
+
+    if (sport === 'cricket') {
+      const parsedTotalOvers = Number(totalOvers);
+      payload.totalOvers =
+        Number.isFinite(parsedTotalOvers) && parsedTotalOvers > 0
+          ? parsedTotalOvers
+          : 20;
+    }
+
+    onCreate(payload);
     onClose();
   };
 
@@ -86,6 +100,22 @@ export function CreateMatchModal({ sport, onClose, onCreate }: Props) {
               className='bg-[#111] border-[#2a2a2a] text-sm h-10'
             />
           </div>
+
+          {sport === 'cricket' && (
+            <div className='space-y-1.5'>
+              <Label className='text-xs text-[#888] uppercase tracking-wider font-medium'>
+                Total Overs
+              </Label>
+              <Input
+                type='number'
+                min='1'
+                value={totalOvers}
+                onChange={(e) => setTotalOvers(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+                className='bg-[#111] border-[#2a2a2a] text-sm h-10'
+              />
+            </div>
+          )}
 
           <button
             onClick={handleCreate}

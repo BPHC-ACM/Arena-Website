@@ -1,5 +1,37 @@
 import type { CricketMatch } from '@/app/lib/types';
 
+const normalizeFieldingTeam = (
+  raw: unknown,
+  teamA: string,
+  teamB: string,
+): 'A' | 'B' => {
+  if (raw === 'A' || raw === 'B') return raw;
+  if (typeof raw !== 'string') return 'B';
+
+  const value = raw.trim().toLowerCase();
+  if (value === 'team a') return 'A';
+  if (value === 'team b') return 'B';
+  if (teamA && value === teamA.trim().toLowerCase()) return 'A';
+  if (teamB && value === teamB.trim().toLowerCase()) return 'B';
+
+  return 'B';
+};
+
+const getBattingTeamKey = (
+  innings: number,
+  firstFieldingTeam: 'A' | 'B',
+): 'A' | 'B' => {
+  if (innings === 1) return firstFieldingTeam === 'A' ? 'B' : 'A';
+  return firstFieldingTeam;
+};
+
+const oversToBalls = (overs: string | number | undefined): number => {
+  const [fullOversRaw, ballsRaw] = String(overs ?? '0.0').split('.');
+  const fullOvers = Number(fullOversRaw) || 0;
+  const balls = Number(ballsRaw) || 0;
+  return fullOvers * 6 + Math.min(Math.max(balls, 0), 5);
+};
+
 export function CricketCard({ match }: { match: CricketMatch }) {
   const { teamA, teamB, scoreA, scoreB, status } = match;
   // dynamically select the active details based on innings
@@ -10,12 +42,19 @@ export function CricketCard({ match }: { match: CricketMatch }) {
           .details2 || match.details
       : match.details;
 
-  const fieldingTeam = match.firstFieldingTeam ?? 'B';
-  const isTeamABatting =
-    (fieldingTeam === 'B' && currentInnings !== 2) ||
-    (fieldingTeam === 'A' && currentInnings === 2);
+  const fieldingTeam = normalizeFieldingTeam(match.firstFieldingTeam, teamA, teamB);
+  const battingTeamKey = getBattingTeamKey(currentInnings, fieldingTeam);
+  const isTeamABatting = battingTeamKey === 'A';
   const leftTeamKey = isTeamABatting ? 'B' : 'A';
   const rightTeamKey = isTeamABatting ? 'A' : 'B';
+
+  const totalOvers = Number(match.totalOvers ?? 20);
+  const battingScore = battingTeamKey === 'A' ? scoreA : scoreB;
+  const oversLeftBalls = Math.max(
+    0,
+    Math.round(totalOvers * 6) - oversToBalls(battingScore?.overs),
+  );
+  const oversLeft = `${Math.floor(oversLeftBalls / 6)}.${oversLeftBalls % 6}`;
 
   const isComplete =
     status === 'Completed' || status === 'Match complete' || !!details?.summary;
@@ -60,6 +99,15 @@ export function CricketCard({ match }: { match: CricketMatch }) {
         {renderTeam(leftTeamKey, 'left')}
         <div className='text-[#333] text-sm font-mono px-2'>vs</div>
         {renderTeam(rightTeamKey, 'right')}
+      </div>
+
+      <div className='flex gap-4 text-xs font-mono'>
+        <span className='text-[#555]'>
+          Total Overs <span className='text-white'>{totalOvers}</span>
+        </span>
+        <span className='text-[#555]'>
+          Overs Left <span className='text-white'>{oversLeft}</span>
+        </span>
       </div>
 
       {/* Target / required (2nd innings) */}
