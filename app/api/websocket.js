@@ -26,7 +26,7 @@ wss.on("connection", (ws, req) => {
         // const user = jwt.verify(token, process.env.token);
 
         // for now this is the just for testing
-        if (token === process.env.token) {
+        if (token === process.env.WS_AUTH_TOKEN) {
             console.log("Token verified successfully");
             ws.user = token; // Attach token to WebSocket for future reference
         } else {

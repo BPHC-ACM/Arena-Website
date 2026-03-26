@@ -1,5 +1,5 @@
 const getExpectedToken = () => {
-  return process.env.SCORE_UPDATE_TOKEN || process.env.token || process.env.NEXT_PUBLIC_WS_TOKEN;
+  return process.env.SCORE_UPDATE_TOKEN || process.env.WS_AUTH_TOKEN;
 };
 
 const getBearerToken = (authorizationHeader) => {

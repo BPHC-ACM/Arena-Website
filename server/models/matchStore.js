@@ -1,7 +1,7 @@
 const { createClient } = require("@supabase/supabase-js");
 
-const supabaseUrl = process.env.supabaseURL || process.env.SUPABASE_URL || "https://placeholder.supabase.co";
-const supabaseKey = process.env.key || process.env.SUPABASE_ANON_KEY || "placeholder-key";
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
 // Only init client if valid URL
 const hasValidConfig = supabaseUrl.includes("supabase.co") && supabaseKey !== "placeholder-key";
