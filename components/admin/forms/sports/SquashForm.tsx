@@ -31,6 +31,7 @@ export function SquashForm({ match, onSave, isCreate }: any) {
       update({
         gamesPlayer1: g1, gamesPlayer2: g2,
         currentGame: (form.currentGame || 1) + 1,
+        status: `Game ${(form.currentGame || 1) + 1}`,
         currentPointsPlayer1: 0, currentPointsPlayer2: 0,
         server: player,
       });
@@ -40,11 +41,7 @@ export function SquashForm({ match, onSave, isCreate }: any) {
   };
 
   const handleStatusChange = (v: string) => {
-    let summary = form.summary;
-    if (['Match complete'].includes(v)) {
-      summary = `${form.player1 || 'Player 1'} won`;
-    }
-    const updates: any = { status: v, summary };
+    const updates: any = { status: v };
     if (v.startsWith('Game ')) {
       const m = v.match(/\d+/);
       const num = m ? parseInt(m[0], 10) : null;

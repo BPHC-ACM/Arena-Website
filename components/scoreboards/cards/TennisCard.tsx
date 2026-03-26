@@ -4,9 +4,12 @@ import { cn } from "@/app/lib/utils";
 export function TennisCard({ match }: { match: TennisMatch }) {
   const { player1, player2, setsPlayer1, setsPlayer2, currentSet, currentGameScorePlayer1, currentGameScorePlayer2, server, surface, status } = match;
 
+  const p1SetsWon = setsPlayer1.filter((s, i) => s > (setsPlayer2[i] || 0)).length;
+  const p2SetsWon = setsPlayer2.filter((s, i) => s > (setsPlayer1[i] || 0)).length;
+
   const rows = [
-    { name: player1, sets: setsPlayer1, cur: currentGameScorePlayer1, serving: server === 1 },
-    { name: player2, sets: setsPlayer2, cur: currentGameScorePlayer2, serving: server === 2 },
+    { name: player1, sets: setsPlayer1, setsWon: p1SetsWon, cur: currentGameScorePlayer1, serving: server === 1 },
+    { name: player2, sets: setsPlayer2, setsWon: p2SetsWon, cur: currentGameScorePlayer2, serving: server === 2 },
   ];
 
   return (
@@ -18,15 +21,21 @@ export function TennisCard({ match }: { match: TennisMatch }) {
       {/* Score table */}
       <div className="rounded-lg bg-[#0d0d0d] overflow-hidden">
         {/* Header */}
-        <div className="grid grid-cols-[1fr_repeat(3,36px)_64px] gap-0 text-[10px] text-[#444] font-medium uppercase tracking-wider px-3 pt-2.5 pb-1.5">
+        <div 
+          className="grid gap-0 text-[10px] text-[#444] font-medium uppercase tracking-wider px-3 pt-2.5 pb-1.5"
+          style={{ gridTemplateColumns: `1fr repeat(${setsPlayer1.length}, 36px) 36px 64px` }}
+        >
           <div />
           {setsPlayer1.map((_, i) => <div key={i} className="text-center">S{i+1}</div>)}
+          <div className="text-center">Sets</div>
           <div className="text-center">Game</div>
         </div>
 
         {rows.map((p, i) => (
-          <div key={i} className={cn("grid gap-0 px-3 py-2.5 items-center border-t border-[#181818]",
-            `grid-cols-[1fr_repeat(${setsPlayer1.length},36px)_64px]`)}>
+          <div key={i} 
+            className="grid gap-0 px-3 py-2.5 items-center border-t border-[#181818]"
+            style={{ gridTemplateColumns: `1fr repeat(${setsPlayer1.length}, 36px) 36px 64px` }}
+          >
             <div className="flex items-center gap-1.5">
               {p.serving && <span className="w-1.5 h-1.5 rounded-full bg-[#57a639]" />}
               <span className={cn("font-semibold text-sm leading-tight", i === 0 ? "text-white" : "text-[#aaa]")}>{p.name}</span>
@@ -35,11 +44,13 @@ export function TennisCard({ match }: { match: TennisMatch }) {
               <div key={j} className={cn("text-center font-mono text-sm",
                 j === currentSet - 1 ? "text-white font-bold" : "text-[#444]")}>{s}</div>
             ))}
+            <div className="text-center font-mono text-sm font-bold text-white bg-[#1a1a1a] rounded mx-1 py-0.5">
+              {p.setsWon}
+            </div>
             <div className="text-center font-mono text-2xl font-extrabold text-white">{p.cur}</div>
           </div>
         ))}
       </div>
-      {match.summary && <p className="text-sm text-center text-[#666] italic pb-1">{match.summary}</p>}
       {status && <p className="text-xs text-center text-[#555]">{status}</p>}
     </div>
   );

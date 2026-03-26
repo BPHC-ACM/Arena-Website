@@ -264,27 +264,15 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
     const batting2Key = batting1Key === 'A' ? 'B' : 'A';
     const batting2Runs = batting2Key === 'A' ? sa : sb;
     const batting2Wickets = batting2Key === 'A' ? wa : wb;
-    const batting2Team = batting2Key === 'A' ? tA : tB;
-    const bowling2Team = batting2Key === 'A' ? tB : tA;
     const batting2Score = batting2Key === 'A' ? scoreA : scoreB;
     const innings2DoneByOvers = oversToBalls(batting2Score?.overs) >= maxBalls;
 
-    let summary = '';
-    if (batting2Runs >= target) {
-      summary = `${batting2Team} won by ${10 - batting2Wickets} wickets`;
-    } else if (batting2Wickets === 10) {
-      if (batting2Runs === target - 1) summary = 'Match Tied';
-      else summary = `${bowling2Team} won by ${target - 1 - batting2Runs} runs`;
-    } else if (innings2DoneByOvers) {
-      if (batting2Runs === target - 1) summary = 'Match Tied';
-      else summary = `${bowling2Team} won by ${target - 1 - batting2Runs} runs`;
-    }
+    const isMatchOver = batting2Runs >= target || batting2Wickets === 10 || innings2DoneByOvers;
 
     const dKey2 = innings === 2 ? 'details2' : 'details';
     if (!next[dKey2]) next[dKey2] = {};
     next[dKey2].target = target;
-    next[dKey2].summary = summary;
-    next.status = summary ? 'Completed' : 'Innings II';
+    next.status = isMatchOver ? 'Completed' : 'Innings II';
   };
 
   // Add a ball delivery + auto-update score

@@ -38,13 +38,8 @@ export function KabaddiForm({ match, onSave, isCreate }: any) {
   };
 
   const handleStatusChange = (v: string) => {
-    let summary = form.summary;
-    if (['Match complete'].includes(v)) {
-      if (form.scoreA === form.scoreB) summary = 'Match Tied';
-      else summary = `${form.scoreA > form.scoreB ? form.teamA || 'Team A' : form.teamB || 'Team B'} won by ${Math.abs(form.scoreA - form.scoreB)} points`;
-    }
     const halfFromStatus = STATUS_HALF_MAP[v];
-    update({ status: v, summary, ...(halfFromStatus ? { half: halfFromStatus } : {}) });
+    update({ status: v, ...(halfFromStatus ? { half: halfFromStatus } : {}) });
   };
 
   const handleHalfChange = (h: number) => {

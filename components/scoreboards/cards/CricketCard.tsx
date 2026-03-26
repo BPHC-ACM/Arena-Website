@@ -57,7 +57,7 @@ export function CricketCard({ match }: { match: CricketMatch }) {
   const oversLeft = `${Math.floor(oversLeftBalls / 6)}.${oversLeftBalls % 6}`;
 
   const isComplete =
-    status === 'Completed' || status === 'Match complete' || !!details?.summary;
+    status === 'Completed' || status === 'Match complete';
   let winner: 'A' | 'B' | 'Tie' | null = null;
   if (isComplete) {
     if (scoreA.runs > scoreB.runs) winner = 'A';
@@ -131,7 +131,7 @@ export function CricketCard({ match }: { match: CricketMatch }) {
       )}
 
       {/* Live match details */}
-      {details && !details.summary && (
+      {details && (
         <div className='rounded-lg bg-[#0d0d0d] p-3 space-y-2.5'>
           {/* Recent balls */}
           {details.recentBalls && details.recentBalls.length > 0 && (
@@ -200,12 +200,7 @@ export function CricketCard({ match }: { match: CricketMatch }) {
         </div>
       )}
 
-      {/* Summary / POTM after match */}
-      {details?.summary && (
-        <p className='text-sm text-center text-[#666] italic'>
-          {details.summary}
-        </p>
-      )}
+
 
       {/* Status */}
       {status && (

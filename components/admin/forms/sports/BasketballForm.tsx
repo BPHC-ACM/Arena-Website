@@ -50,13 +50,8 @@ export function BasketballForm({ match, onSave, isCreate }: any) {
   };
 
   const handleStatus = (v: string) => {
-    let summary = form.summary;
-    if (v === 'Full time' || v === 'OT') {
-      if (form.scoreA === form.scoreB) summary = 'Match Tied';
-      else summary = `${form.scoreA > form.scoreB ? form.teamA || 'Team A' : form.teamB || 'Team B'} won by ${Math.abs(form.scoreA - form.scoreB)} points`;
-    }
     const quarterFromStatus = STATUS_QUARTER_MAP[v];
-    update({ status: v, summary, ...(quarterFromStatus ? { currentQuarter: quarterFromStatus } : {}) });
+    update({ status: v, ...(quarterFromStatus ? { currentQuarter: quarterFromStatus } : {}) });
   };
 
   const handleQuarterClick = (q: number) => {

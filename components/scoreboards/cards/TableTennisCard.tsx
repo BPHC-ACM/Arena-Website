@@ -34,7 +34,6 @@ export function TableTennisCard({ match }: { match: TableTennisMatch }) {
           </div>
         ))}
       </div>
-      {match.summary && <p className="text-sm text-center text-[#666] italic pb-1">{match.summary}</p>}
       {status && <p className="text-xs text-center text-[#555]">{status}</p>}
     </div>
   );

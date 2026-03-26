@@ -69,11 +69,7 @@ export function TennisForm({ match, onSave, isCreate }: any) {
   };
 
   const handleStatusChange = (v: string) => {
-    let summary = form.summary;
-    if (['Match complete'].includes(v)) {
-      summary = `${form.player1 || 'Player 1'} won`;
-    }
-    const updates: any = { status: v, summary };
+    const updates: any = { status: v };
     if (v.startsWith('Set ')) {
       const m = v.match(/\d+/);
       const num = m ? parseInt(m[0], 10) : null;
@@ -135,7 +131,11 @@ export function TennisForm({ match, onSave, isCreate }: any) {
         onChange={(v) => update({ server: v })}
       />
       <div className='grid grid-cols-3 gap-3'>
-        <TF label='Current Set' value={form.currentSet} type='number' onChange={(v: number) => update({ currentSet: v })} />
+        <TF label='Current Set' value={form.currentSet} type='number' onChange={(v: number) => {
+            const updates: any = { currentSet: v };
+            if (v >= 1 && v <= 5) updates.status = `Set ${v}`;
+            update(updates);
+        }} />
         <div className='space-y-1.5'>
           <Label className='text-xs text-[#888] font-medium uppercase tracking-wider'>
             Sets P1

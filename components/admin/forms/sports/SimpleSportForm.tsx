@@ -6,28 +6,32 @@ import { DEFAULTS } from '../shared/constants';
 export function SimpleSportForm({ sport, match, onSave, isCreate }: any) {
   const [form, setForm] = useState(match ?? DEFAULTS[sport as keyof typeof DEFAULTS]);
 
+  const SYNC_CONFIG: Record<string, { field: string; prefix: string }> = {
+    khokho: { field: 'currentInning', prefix: 'Inning ' },
+    carrom: { field: 'currentBoard', prefix: 'Board ' },
+    '8ball': { field: 'currentFrame', prefix: 'Frame ' },
+    snooker: { field: 'currentFrame', prefix: 'Frame ' },
+  };
+
+  const config = SYNC_CONFIG[sport as string];
+
   const update = (key: string, value: any) => {
-    const next = { ...form, [key]: value };
+    const updates: any = { [key]: value };
+    if (config && key === config.field) {
+      updates.status = `${config.prefix}${value}`;
+    }
+    const next = { ...form, ...updates };
     setForm(next);
     if (!isCreate) setTimeout(() => onSave(next), 0);
   };
 
   const handleStatusChange = (v: string) => {
-    let summary = form.summary;
-    if (['Full time', 'Match complete', 'Game complete', 'Competition complete'].includes(v)) {
-      const tA = form.teamA || form.player1 || form.athlete1 || 'Player 1';
-      const tB = form.teamB || form.player2 || form.athlete2 || 'Player 2';
-      const sa = form.scoreA || form.scorePlayer1 || form.scoreAthlete1 || 0;
-      const sb = form.scoreB || form.scorePlayer2 || form.scoreAthlete2 || 0;
-      
-      if (typeof sa === 'number' && typeof sb === 'number') {
-        if (sa === sb) summary = 'Match Tied';
-        else summary = `${sa > sb ? tA : tB} won by ${Math.abs(sa - sb)} points`;
-      } else {
-        summary = `${tA} won`;
-      }
+    const updates: any = { status: v };
+    if (config && v.startsWith(config.prefix)) {
+      const num = parseInt(v.replace(config.prefix, ''), 10);
+      if (!isNaN(num)) updates[config.field] = num;
     }
-    const next = { ...form, status: v, summary };
+    const next = { ...form, ...updates };
     setForm(next);
     if (!isCreate) setTimeout(() => onSave(next), 0);
   };

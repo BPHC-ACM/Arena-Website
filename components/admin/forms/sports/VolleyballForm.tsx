@@ -37,6 +37,7 @@ export function VolleyballForm({ match, onSave, isCreate }: any) {
         setWinsA: wA,
         setWinsB: wB,
         currentSet: (form.currentSet || 1) + 1,
+        status: `Set ${(form.currentSet || 1) + 1}`,
         currentPointsTeamA: 0,
         currentPointsTeamB: 0,
       });
@@ -46,11 +47,7 @@ export function VolleyballForm({ match, onSave, isCreate }: any) {
   };
 
   const handleStatusChange = (v: string) => {
-    let summary = form.summary;
-    if (['Match complete'].includes(v)) {
-      summary = `${form.setWinsA > form.setWinsB ? form.teamA || 'Team A' : form.teamB || 'Team B'} won`;
-    }
-    const updates: any = { status: v, summary };
+    const updates: any = { status: v };
     if (v.startsWith('Set ')) {
       const m = v.match(/\d+/);
       const num = m ? parseInt(m[0], 10) : null;

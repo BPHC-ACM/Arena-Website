@@ -20,12 +20,7 @@ export function HockeyForm({ match, onSave, isCreate }: any) {
   };
 
   const handleStatusChange = (v: string) => {
-    let summary = form.summary;
-    if (['Match complete', 'Full time'].includes(v)) {
-      if (form.scoreA === form.scoreB) summary = 'Match Tied';
-      else summary = `${form.scoreA > form.scoreB ? form.teamA || 'Team A' : form.teamB || 'Team B'} won by ${Math.abs(form.scoreA - form.scoreB)} goals`;
-    }
-    const updates: any = { status: v, summary };
+    const updates: any = { status: v };
     if (v.startsWith('Period ')) {
       const m = v.match(/\d+/);
       const num = m ? parseInt(m[0], 10) : null;

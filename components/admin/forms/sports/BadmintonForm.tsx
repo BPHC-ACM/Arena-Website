@@ -42,7 +42,7 @@ export function BadmintonForm({ match, onSave, isCreate }: any) {
         currentGame: matchWon ? form.currentGame || 1 : (form.currentGame || 1) + 1,
         currentPointsPlayer1: 0, currentPointsPlayer2: 0,
         server: player,
-        ...(matchWon && { status: 'Match complete', summary: `${player === 1 ? form.player1 || 'Player 1' : form.player2 || 'Player 2'} won` })
+        ...(matchWon ? { status: 'Match complete' } : { status: `Game ${(form.currentGame || 1) + 1}` })
       });
     } else {
       update({ [f]: pts, server: player });
@@ -50,11 +50,7 @@ export function BadmintonForm({ match, onSave, isCreate }: any) {
   };
 
   const handleStatusChange = (v: string) => {
-    let summary = form.summary;
-    if (['Match complete'].includes(v)) {
-      summary = `${form.player1 || 'Player 1'} won`;
-    }
-    const updates: any = { status: v, summary };
+    const updates: any = { status: v };
     if (v.startsWith('Game ')) {
       const m = v.match(/\d+/);
       const num = m ? parseInt(m[0], 10) : null;
