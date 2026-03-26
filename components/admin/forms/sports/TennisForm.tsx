@@ -37,7 +37,16 @@ export function TennisForm({ match, onSave, isCreate }: any) {
          const si = (form.currentSet || 1) - 1;
          s1[si] = (s1[si] || 0) + (player === 1 ? 1 : 0);
          s2[si] = (s2[si] || 0) + (player === 2 ? 1 : 0);
-         update({ setsPlayer1: s1, setsPlayer2: s2, currentGameScorePlayer1: '0', currentGameScorePlayer2: '0', server: form.server === 1 ? 2 : 1 });
+         const nextSet = (form.currentSet || 1) + 1;
+         update({ 
+           setsPlayer1: s1, 
+           setsPlayer2: s2, 
+           currentGameScorePlayer1: '0', 
+           currentGameScorePlayer2: '0', 
+           currentSet: nextSet,
+           status: `Set ${nextSet}`,
+           server: form.server === 1 ? 2 : 1 
+         });
       } else {
          update({ currentGameScorePlayer1: newP1.toString(), currentGameScorePlayer2: newP2.toString() });
       }
@@ -54,7 +63,21 @@ export function TennisForm({ match, onSave, isCreate }: any) {
       const si = (form.currentSet || 1) - 1;
       s1[si] = (s1[si] || 0) + (player === 1 ? 1 : 0);
       s2[si] = (s2[si] || 0) + (player === 2 ? 1 : 0);
-      update({ setsPlayer1: s1, setsPlayer2: s2, currentGameScorePlayer1: '0', currentGameScorePlayer2: '0', server: form.server === 1 ? 2 : 1 });
+
+      const g1 = s1[si];
+      const g2 = s2[si];
+      const setOver = (g1 >= 6 && g1 - g2 >= 2) || (g2 >= 6 && g2 - g1 >= 2) || g1 === 7 || g2 === 7;
+      const nextSet = setOver ? (form.currentSet || 1) + 1 : (form.currentSet || 1);
+
+      update({ 
+        setsPlayer1: s1, 
+        setsPlayer2: s2, 
+        currentGameScorePlayer1: '0', 
+        currentGameScorePlayer2: '0', 
+        server: form.server === 1 ? 2 : 1,
+        currentSet: nextSet,
+        ...(setOver ? { status: `Set ${nextSet}` } : {})
+      });
     };
 
     if (wCur === 'A' || (wCur === '40' && lCur !== '40' && lCur !== 'A')) return winGame();
