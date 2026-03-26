@@ -1,5 +1,10 @@
-import { redirect } from "next/navigation";
+import SportGrid from "@/components/SportGrid";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Scores | Arena 2026",
+};
 
 export default function ScoreboardsIndex() {
-  redirect("/scoreboards/cricket");
+  return <SportGrid basePath="/scoreboards" />;
 }

@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import SportGrid from "@/components/SportGrid";
 
 export default function AdminIndex() {
-  redirect("/admin/cricket");
+  return <SportGrid basePath="/admin" />;
 }
