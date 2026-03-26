@@ -19,7 +19,7 @@ const createCricketMatch = (data) => {
     totalOvers:
       Number.isFinite(parsedTotalOvers) && parsedTotalOvers > 0
         ? parsedTotalOvers
-        : 20,
+        : 10,
     scoreA: data.scoreA || {
       runs: 0,
       wickets: 0,
@@ -62,7 +62,7 @@ const updateCricketMatch = (id, data) => {
             totalOvers:
               Number.isFinite(parsedTotalOvers) && parsedTotalOvers > 0
                 ? parsedTotalOvers
-                : cricketMatches[index].totalOvers || 20,
+                : cricketMatches[index].totalOvers || 10,
           };
 
     cricketMatches[index] = { ...cricketMatches[index], ...normalizedData };

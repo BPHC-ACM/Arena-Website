@@ -39,7 +39,7 @@ export function CreateMatchModal({ sport, onClose, onCreate }: Props) {
   const [labelA, keyA, labelB, keyB] = PARTICIPANT_FIELDS[sport];
   const [valA, setValA] = useState('');
   const [valB, setValB] = useState('');
-  const [totalOvers, setTotalOvers] = useState('20');
+  const [totalOvers, setTotalOvers] = useState('10');
 
   const handleCreate = () => {
     if (!valA.trim() || !valB.trim()) return;
@@ -53,7 +53,7 @@ export function CreateMatchModal({ sport, onClose, onCreate }: Props) {
       payload.totalOvers =
         Number.isFinite(parsedTotalOvers) && parsedTotalOvers > 0
           ? parsedTotalOvers
-          : 20;
+          : 10;
     }
 
     onCreate(payload);

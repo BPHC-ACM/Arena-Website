@@ -17,16 +17,8 @@ const BALL_BTNS = [
   { label: '5', value: '5', color: '#fff', bg: '#161616' },
   { label: '6', value: '6', color: ACCENT, bg: '#0d1a0a' },
   { label: 'W', value: 'W', color: '#ef4444', bg: '#1a0808' },
-  { label: 'WD', value: 'WD', color: '#facc15', bg: '#1a1400' },
-  { label: 'WD+1', value: 'WD+1', color: '#facc15', bg: '#1a1400' },
-  { label: 'WD+2', value: 'WD+2', color: '#facc15', bg: '#1a1400' },
-  { label: 'WD+3', value: 'WD+3', color: '#facc15', bg: '#1a1400' },
-  { label: 'WD+4', value: 'WD+4', color: '#facc15', bg: '#1a1400' },
-  { label: 'NB', value: 'NB', color: '#facc15', bg: '#1a1400' },
-  { label: 'NB+1', value: 'NB+1', color: '#facc15', bg: '#1a1400' },
-  { label: 'NB+2', value: 'NB+2', color: '#facc15', bg: '#1a1400' },
-  { label: 'NB+3', value: 'NB+3', color: '#facc15', bg: '#1a1400' },
-  { label: 'NB+4', value: 'NB+4', color: '#facc15', bg: '#1a1400' },
+  { label: 'WD', value: 'WD_MODAL', color: '#facc15', bg: '#1a1400' },
+  { label: 'NB', value: 'NB_MODAL', color: '#facc15', bg: '#1a1400' },
 ];
 
 // Determine if a ball counts toward the over (WD and NB don't)
@@ -57,7 +49,7 @@ const defaultForm = () => ({
   teamA: '',
   teamB: '',
   firstFieldingTeam: 'B',
-  totalOvers: 20,
+  totalOvers: 10,
   scoreA: { runs: 0, wickets: 0, overs: '0.0', extras: 0 },
   scoreB: { runs: 0, wickets: 0, overs: '0.0', extras: 0 },
   innings: 1,
@@ -148,9 +140,39 @@ const oversToBalls = (overs: unknown): number => {
   return fullOvers * 6 + Math.min(Math.max(balls, 0), 5);
 };
 
+const resolveBattingFirstTeamKey = (
+  firstFieldingTeam: 'A' | 'B',
+  scoreA: any,
+  scoreB: any,
+): 'A' | 'B' => {
+  const expected = getBattingTeamKey(1, firstFieldingTeam);
+  const other = expected === 'A' ? 'B' : 'A';
+
+  const expectedBalls = oversToBalls(expected === 'A' ? scoreA?.overs : scoreB?.overs);
+  const otherBalls = oversToBalls(other === 'A' ? scoreA?.overs : scoreB?.overs);
+
+  // If legacy data has the toss/fielding side flipped, follow real scoring progress.
+  if (expectedBalls === 0 && otherBalls > 0) return other;
+  return expected;
+};
+
+const resolveCurrentBattingTeamKey = (
+  innings: number,
+  firstFieldingTeam: 'A' | 'B',
+  scoreA: any,
+  scoreB: any,
+): 'A' | 'B' => {
+  const battingFirst = resolveBattingFirstTeamKey(firstFieldingTeam, scoreA, scoreB);
+  if (innings === 1) return battingFirst;
+  return battingFirst === 'A' ? 'B' : 'A';
+};
+
 export function CricketAdminForm({ match, onSave, isCreate }: Props) {
   const [form, setForm] = useState<any>(match ?? defaultForm());
   const [localValues, setLocalValues] = useState<Record<string, string>>({});
+  const [extraModalType, setExtraModalType] = useState<'WD' | 'NB' | null>(
+    null,
+  );
 
   useEffect(() => {
     setForm(match ? { ...match } : defaultForm());
@@ -222,11 +244,11 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
       tB,
     );
     next.firstFieldingTeam = firstFielding;
-    const totalOvers = Number(next.totalOvers) || 20;
+    const totalOvers = Number(next.totalOvers) || 10;
     const maxBalls = Math.max(1, Math.floor(totalOvers * 6));
+    const batting1Key = resolveBattingFirstTeamKey(firstFielding, scoreA, scoreB);
 
     if (innings === 1) {
-      const batting1Key = getBattingTeamKey(1, firstFielding);
       const batting1Score = batting1Key === 'A' ? scoreA : scoreB;
       const innings1DoneByOvers = oversToBalls(batting1Score?.overs) >= maxBalls;
 
@@ -238,12 +260,13 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
     }
 
     // Innings 2
-    const target = (firstFielding === 'B' ? sa : sb) + 1;
-    const batting2Runs = firstFielding === 'B' ? sb : sa;
-    const batting2Wickets = firstFielding === 'B' ? wb : wa;
-    const batting2Team = firstFielding === 'B' ? tB : tA;
-    const bowling2Team = firstFielding === 'B' ? tA : tB;
-    const batting2Score = firstFielding === 'B' ? scoreB : scoreA;
+    const target = (batting1Key === 'A' ? sa : sb) + 1;
+    const batting2Key = batting1Key === 'A' ? 'B' : 'A';
+    const batting2Runs = batting2Key === 'A' ? sa : sb;
+    const batting2Wickets = batting2Key === 'A' ? wa : wb;
+    const batting2Team = batting2Key === 'A' ? tA : tB;
+    const bowling2Team = batting2Key === 'A' ? tB : tA;
+    const batting2Score = batting2Key === 'A' ? scoreA : scoreB;
     const innings2DoneByOvers = oversToBalls(batting2Score?.overs) >= maxBalls;
 
     let summary = '';
@@ -259,6 +282,7 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
 
     const dKey2 = innings === 2 ? 'details2' : 'details';
     if (!next[dKey2]) next[dKey2] = {};
+    next[dKey2].target = target;
     next[dKey2].summary = summary;
     next.status = summary ? 'Completed' : 'Innings II';
   };
@@ -267,7 +291,18 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
   const addBall = (ball: string) => {
     updateAndSave((prev: any) => {
       const next = JSON.parse(JSON.stringify(prev));
-      const totalOvers = Number(next.totalOvers) || 20;
+
+      const existingSummary =
+        next?.details2?.summary || next?.details?.summary || '';
+      const existingStatus = String(next?.status || '');
+      const resultAlreadyDeclared =
+        /won|tied/i.test(existingSummary) || existingStatus === 'Completed';
+
+      if (resultAlreadyDeclared) {
+        return next;
+      }
+
+      const totalOvers = Number(next.totalOvers) || 10;
       const maxBalls = Math.max(1, Math.floor(totalOvers * 6));
       const dKey = next.innings === 2 ? 'details2' : 'details';
       const d = (next[dKey] ??= {});
@@ -279,7 +314,12 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
         next.teamB || '',
       );
       next.firstFieldingTeam = normalizedFielding;
-      const battingTeamKey = getBattingTeamKey(next.innings ?? 1, normalizedFielding);
+      const battingTeamKey = resolveCurrentBattingTeamKey(
+        next.innings ?? 1,
+        normalizedFielding,
+        next.scoreA,
+        next.scoreB,
+      );
       const inningsKey = battingTeamKey === 'A' ? 'scoreA' : 'scoreB';
       const score = (next[inningsKey] ??= {
         runs: 0,
@@ -347,7 +387,12 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
         next.teamB || '',
       );
       next.firstFieldingTeam = normalizedFielding;
-      const battingTeamKey = getBattingTeamKey(next.innings ?? 1, normalizedFielding);
+      const battingTeamKey = resolveCurrentBattingTeamKey(
+        next.innings ?? 1,
+        normalizedFielding,
+        next.scoreA,
+        next.scoreB,
+      );
       const inningsKey = battingTeamKey === 'A' ? 'scoreA' : 'scoreB';
       const score = next[inningsKey];
       if (!score) return next;
@@ -389,6 +434,75 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
   const getDKey = (f: any) => (f.innings === 2 ? 'details2' : 'details');
   const balls: string[] = form[getDKey(form)]?.recentBalls ?? [];
   const fp = { get, setPatch, textVal, handleTextChange, handleTextBlur };
+
+  const autoTarget = (() => {
+    const firstFielding = normalizeFieldingTeam(
+      form.firstFieldingTeam,
+      form.teamA || '',
+      form.teamB || '',
+    );
+    const sa = form.scoreA?.runs ?? 0;
+    const sb = form.scoreB?.runs ?? 0;
+    const batting1Key = resolveBattingFirstTeamKey(firstFielding, form.scoreA, form.scoreB);
+    return (batting1Key === 'A' ? sa : sb) + 1;
+  })();
+
+  const isFirstInningsDone = (() => {
+    const firstFielding = normalizeFieldingTeam(
+      form.firstFieldingTeam,
+      form.teamA || '',
+      form.teamB || '',
+    );
+    const totalOvers = Number(form.totalOvers) || 10;
+    const maxBalls = Math.max(1, Math.floor(totalOvers * 6));
+    const batting1Key = resolveBattingFirstTeamKey(firstFielding, form.scoreA, form.scoreB);
+    const batting1Score = batting1Key === 'A' ? form.scoreA : form.scoreB;
+    const batting1Wickets = batting1Score?.wickets ?? 0;
+    const batting1Balls = oversToBalls(batting1Score?.overs);
+
+    return batting1Wickets >= 10 || batting1Balls >= maxBalls;
+  })();
+
+  const matchResultText = (() => {
+    const summary2 = form?.details2?.summary;
+    const summary1 = form?.details?.summary;
+    const status = form?.status;
+
+    if (typeof summary2 === 'string' && /(won|tied)/i.test(summary2)) {
+      return summary2;
+    }
+    if (typeof summary1 === 'string' && /(won|tied)/i.test(summary1)) {
+      return summary1;
+    }
+    if (typeof status === 'string' && /(won|tied)/i.test(status)) {
+      return status;
+    }
+    if (status === 'Completed') {
+      return 'Match Completed';
+    }
+    return '';
+  })();
+
+  const isScoringLocked = Boolean(matchResultText);
+
+  const handleBallButton = (value: string) => {
+    if (value === 'WD_MODAL') {
+      setExtraModalType('WD');
+      return;
+    }
+    if (value === 'NB_MODAL') {
+      setExtraModalType('NB');
+      return;
+    }
+    addBall(value);
+  };
+
+  const selectExtraBall = (extraRuns: number) => {
+    if (!extraModalType) return;
+    const value = extraRuns === 0 ? extraModalType : `${extraModalType}+${extraRuns}`;
+    addBall(value);
+    setExtraModalType(null);
+  };
 
   const submitForm = () => {
     const next = { ...form };
@@ -475,12 +589,26 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
         </Label>
         <div className='flex gap-2'>
           {[1, 2].map((i) => (
+            (() => {
+              const innings2Locked = i === 2 && !isFirstInningsDone;
+              return (
             <button
               key={i}
-              onClick={() => setPatch('innings', i)}
+              onClick={() => {
+                if (innings2Locked) return;
+                setPatch('innings', i);
+              }}
+              disabled={innings2Locked}
               className='flex-1 h-10 rounded-lg text-sm font-semibold border transition-colors'
               style={
-                (form.innings ?? 1) === i
+                innings2Locked
+                  ? {
+                      background: '#0a0a0a',
+                      borderColor: '#1a1a1a',
+                      color: '#3f3f3f',
+                      cursor: 'not-allowed',
+                    }
+                  : (form.innings ?? 1) === i
                   ? {
                       background: `${ACCENT}20`,
                       borderColor: `${ACCENT}44`,
@@ -495,6 +623,8 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
             >
               Innings {i}
             </button>
+              );
+            })()
           ))}
         </div>
       </div>
@@ -549,12 +679,15 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
           {BALL_BTNS.map((btn) => (
             <button
               key={btn.value}
-              onClick={() => addBall(btn.value)}
+              onClick={() => handleBallButton(btn.value)}
+              disabled={isScoringLocked}
               className='h-11 rounded-lg text-sm font-bold font-mono border transition-all hover:brightness-125 active:scale-95'
               style={{
                 background: btn.bg,
                 borderColor: '#2a2a2a',
                 color: btn.color,
+                opacity: isScoringLocked ? 0.45 : 1,
+                cursor: isScoringLocked ? 'not-allowed' : 'pointer',
               }}
             >
               {btn.label}
@@ -562,7 +695,12 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
           ))}
           <button
             onClick={removeBall}
+            disabled={isScoringLocked}
             className='h-11 rounded-lg text-sm border border-[#2a2a2a] bg-[#161616] text-[#555] transition-all hover:text-[#888] flex items-center justify-center'
+            style={{
+              opacity: isScoringLocked ? 0.45 : 1,
+              cursor: isScoringLocked ? 'not-allowed' : 'pointer',
+            }}
           >
             <Delete className='w-4 h-4 flex-shrink-0' />
           </button>
@@ -574,7 +712,14 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
       {/* Target / CRR / RRR */}
       {form.innings === 2 ? (
         <div className='grid grid-cols-3 gap-3'>
-          <TF label='Target' path='details2.target' type='number' {...fp} />
+          <div className='space-y-1.5'>
+            <Label className='text-xs text-[#888] uppercase tracking-wider font-medium'>
+              Target
+            </Label>
+            <div className='h-9 flex items-center px-3 bg-[#0d0d0d] border border-[#222] rounded-md text-sm text-white font-mono'>
+              {isFirstInningsDone ? autoTarget : '--'}
+            </div>
+          </div>
           <div className='space-y-1.5'>
             <Label className='text-xs text-[#888] uppercase tracking-wider font-medium'>
               CRR
@@ -592,6 +737,46 @@ export function CricketAdminForm({ match, onSave, isCreate }: Props) {
           </Label>
           <div className='h-9 flex items-center px-3 bg-[#0d0d0d] border border-[#222] rounded-md text-sm text-[#aaa] font-mono'>
             {get('details.crr') || '0.00'}
+          </div>
+        </div>
+      )}
+
+      {matchResultText && (
+        <div className='rounded-lg border px-3 py-2 text-sm font-semibold bg-[#0d150a] border-[#274021] text-[#9de28a]'>
+          {matchResultText}
+        </div>
+      )}
+
+      {extraModalType && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
+          <div className='w-full max-w-xs rounded-xl border border-[#222] bg-[#0d0d0d] p-4 space-y-4'>
+            <div>
+              <p className='text-sm font-bold text-white'>
+                {extraModalType} Extra Runs
+              </p>
+              <p className='text-xs text-[#666] mt-1'>
+                Select additional runs (base 1 is included automatically).
+              </p>
+            </div>
+
+            <div className='grid grid-cols-5 gap-2'>
+              {[0, 1, 2, 3, 4].map((n) => (
+                <button
+                  key={n}
+                  onClick={() => selectExtraBall(n)}
+                  className='h-10 rounded-lg border border-[#2a2a2a] text-sm font-bold text-[#facc15] bg-[#1a1400] hover:brightness-125'
+                >
+                  +{n}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setExtraModalType(null)}
+              className='w-full h-10 rounded-lg border border-[#2a2a2a] text-sm text-[#888] hover:text-white'
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}
