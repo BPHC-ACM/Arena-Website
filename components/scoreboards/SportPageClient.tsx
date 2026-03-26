@@ -16,7 +16,7 @@ export function SportPageClient({ sport }: { sport: SportId }) {
   const isFav = isFavourite(sport);
 
   return (
-    <div className='relative px-4 py-6 md:px-10 md:py-10 max-w-3xl mx-auto'>
+    <div className='relative px-4 py-6 md:px-10 md:py-10 max-w-3xl'>
       {/* Arena logo watermark */}
       <div
         className='pointer-events-none fixed inset-0 flex items-center justify-center z-0'
