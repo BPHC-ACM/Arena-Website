@@ -58,7 +58,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={cn(
-                  'w-full bg-[#161616] border border-[#222] rounded-xl px-5 py-4 text-center text-lg tracking-[0.3em] font-bold focus:outline-none focus:border-[#57a639] transition-all',
+                  'w-full bg-[#161616] border border-[#222] rounded-xl px-5 py-4 text-center text-md tracking-[0.3em] font-bold focus:outline-none focus:border-[#57a639] transition-all',
                   error && 'border-red-500/50 bg-red-500/5',
                 )}
                 autoFocus
