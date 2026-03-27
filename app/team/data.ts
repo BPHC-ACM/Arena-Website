@@ -66,75 +66,80 @@ export const allMembers: TeamMember[] = [
     "photo": "/team/37.webp"
   },
   {
+    "id": 38,
+    "name": "Adarsh Tatavarty",
+    "role": "Corroboration and Review Committee",
+    "department": "Core",
+    "council": "core",
+    "group": "crc",
+    "photo": "/cossacns/38.webp"
+  },
+  {
     "id": 5,
-    "name": "Rohan Das",
-    "role": "Tech Lead",
-    "department": "Tech",
-    "council": "cossacn"
+    "name": "Saiteja Kashiboina",
+    "role": "CoSSAcN",
+    "department": "DoTA",
+    "council": "cossacn",
+    "photo": "/cossacns/5.webp"
   },
   {
     "id": 6,
-    "name": "Sneha Iyer",
-    "role": "Design Head",
-    "department": "Design",
-    "council": "cossacn"
+    "name": "Aryan Sharma",
+    "role": "CoSSAcN",
+    "department": "DoRA",
+    "council": "cossacn",
+    "photo": "/cossacns/6.webp"
   },
   {
     "id": 7,
-    "name": "Karan Verma",
-    "role": "Logistics Head",
-    "department": "Ops",
-    "council": "cossacn"
+    "name": "Arjun Vijay Kumar",
+    "role": "CoSSAcN",
+    "department": "Dopy",
+    "council": "cossacn",
+    "photo": "/cossacns/7.webp"
   },
   {
     "id": 8,
-    "name": "Chess",
-    "role": "Chess Captain: Oojasv Goswami",
-    "department": "Events",
-    "council": "cossacn"
+    "name": "Abhinav Chinta",
+    "role": "CoSSAcN",
+    "department": "DOSM",
+    "council": "cossacn",
+    "photo": "/cossacns/8.webp"
   },
   {
     "id": 9,
-    "name": "Aditya Kumar",
-    "role": "Sponsorship Head",
-    "department": "Sponsors",
-    "council": "cossacn"
+    "name": "Pritish Saraf",
+    "role": "CoSSAcN",
+    "department": "LSD",
+    "council": "cossacn",
+    "photo": "/cossacns/9.webp"
   },
-  {
-    "id": 10,
-    "name": "Neha Reddy",
-    "role": "Media Head",
-    "department": "Media",
-    "council": "cossacn"
-  },
+
   {
     "id": 13,
-    "name": "Athletics",
-    "role": "Athletic Captains: Ramansh Kapil & Sanvi Udhan",
-    "department": "Outreach",
-    "council": "cossacn"
+    "name": "Akshit Krishna Velugubantla",
+    "role": "CoSSAcN",
+    "department": "DePP",
+    "council": "cossacn",
+    "photo": "/cossacns/13.webp"
   },
   {
     "id": 14,
-    "name": "Kavya Menon",
-    "role": "Creatives Head",
-    "department": "Creative",
-    "council": "cossacn"
+    "name": "Sai Pranav",
+    "role": "CoSSAcN",
+    "department": "Department of Firewallz",
+    "council": "cossacn",
+    "photo": "/cossacns/14.webp"
   },
   {
     "id": 15,
-    "name": "Aryan Shah",
-    "role": "Hospitality Head",
-    "department": "Hospitality",
-    "council": "cossacn"
+    "name": "Havish Kadaveru",
+    "role": "CoSSAcN",
+    "department": "Arts and Dceo",
+    "council": "cossacn",
+    "photo": "/cossacns/15.webp"
   },
-  {
-    "id": 16,
-    "name": "Tanya Kapoor",
-    "role": "Content Head",
-    "department": "Content",
-    "council": "cossacn"
-  },
+
   {
     "id": 11,
     "name": "Snooker",
@@ -268,34 +273,7 @@ export const allMembers: TeamMember[] = [
     "name": "Volleyball",
     "role": "Volleyball Captains: Ram Satish & Amatulla Jaliwala",
     "department": "Fitness",
-    "council": "sports"
-  },
-  {
-    "id": 32,
-    "name": "Riya Menon",
-    "role": "Yoga Head",
-    "department": "Yoga",
-    "council": "sports"
-  },
-  {
-    "id": 33,
-    "name": "Dev Kapoor",
-    "role": "Boxing Head",
-    "department": "Boxing",
-    "council": "sports"
-  },
-  {
-    "id": 34,
-    "name": "Ishaan Nair",
-    "role": "E-Sports Head",
-    "department": "E-Sports",
-    "council": "sports"
-  },
-  {
-    "id": 35,
-    "name": "Pooja Singh",
-    "role": "Logistics Coord.",
-    "department": "Logistics",
-    "council": "sports"
+    "council": "sports",
+    "photo": "/team/31.webp"
   }
 ];
