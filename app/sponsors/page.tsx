@@ -45,43 +45,55 @@ export default function SponsorsPage() {
           OUR SPONSORS
         </h1>
 
-        {/* Title Sponsors Section */}
-        <div className="w-full max-w-[1100px] flex flex-col items-center mb-[40px]">
-          <h2 
-            className="text-[#d97736] text-[20px] md:text-[28px] mb-[30px]"
-            style={{ fontFamily: "'gangofthree', sans-serif" }}
-          >
-            TITLE SPONSORS
-          </h2>
+        {/* Sponsors Sections */}
+        <div className="w-full max-w-[1100px] flex flex-col items-center">
           
-          <div className="flex flex-col md:flex-row justify-center gap-8 md:gap-[40px] w-full mb-[40px]">
-            {/* Box 1 */}
-            <div className="flex flex-col items-center w-full max-w-[450px]">
-              <div className="w-full aspect-[4/3] bg-[#D9D9D9] mb-4 shadow-xl border border-white/5" />
-              <p 
-                className="text-[#d97736] text-[16px] md:text-[20px]"
-                style={{ fontFamily: "'gangofthree', sans-serif" }}
-              >
-                TITLE SPONSOR
-              </p>
+          {/* Title Partner */}
+          <div className="flex flex-col items-center mb-[60px] w-full">
+            <h2 
+              className="text-[#d97736] text-[20px] md:text-[28px] mb-[30px]"
+              style={{ fontFamily: "'gangofthree', sans-serif" }}
+            >
+              TITLE PARTNER
+            </h2>
+            <div className="w-full max-w-[500px] aspect-[4/3] bg-white rounded-xl shadow-2xl flex items-center justify-center p-8 border border-white/10">
+              <img 
+                src="/sponsors/sbi.webp" 
+                alt="SBI" 
+                className="w-full h-full object-contain"
+              />
             </div>
-            
-            {/* Box 2 */}
-            <div className="flex flex-col items-center w-full max-w-[450px]">
-              <div className="w-full aspect-[4/3] bg-[#D9D9D9] mb-4 shadow-xl border border-white/5" />
-              <p 
-                className="text-[#d97736] text-[16px] md:text-[20px]"
-                style={{ fontFamily: "'gangofthree', sans-serif" }}
-              >
-                CO-TITLE SPONSOR
-              </p>
+            <p 
+              className="mt-6 text-[#d97736] text-[18px] md:text-[24px]"
+              style={{ fontFamily: "'gangofthree', sans-serif" }}
+            >
+              SBI Bank
+            </p>
+          </div>
+
+          {/* Associate Partner */}
+          <div className="flex flex-col items-center w-full">
+            <h2 
+              className="text-[#d97736] text-[20px] md:text-[28px] mb-[30px]"
+              style={{ fontFamily: "'gangofthree', sans-serif" }}
+            >
+              ASSOCIATE TITLE PARTNER
+            </h2>
+            <div className="w-full max-w-[500px] aspect-[4/3] bg-white rounded-xl shadow-2xl flex items-center justify-center p-12 border border-white/10">
+              <img 
+                src="/sponsors/icici.webp" 
+                alt="ICICI Bank" 
+                className="w-full h-full object-contain"
+              />
             </div>
+            <p 
+              className="mt-6 text-[#d97736] text-[18px] md:text-[24px]"
+              style={{ fontFamily: "'gangofthree', sans-serif" }}
+            >
+              ICICI BANK
+            </p>
           </div>
-          
-          {/* Below Box 3 Placeholder */}
-          <div className="flex flex-col items-center w-full max-w-[450px]">
-            <div className="w-full aspect-[4/3] bg-[#D9D9D9] mb-4 shadow-xl border border-white/5" />
-          </div>
+
         </div>
 
       </div>

@@ -21,6 +21,24 @@ export const allMembers: TeamMember[] = [
     "photo": "/team/1.webp"
   },
   {
+    "id": 39,
+    "name": "Karthik Gopireddy",
+    "role": "Sports Secretary - Boys",
+    "department": "Core",
+    "council": "core",
+    "group": "suc",
+    "photo": "/team/karthik.webp"
+  },
+  {
+    "id": 40,
+    "name": "Rachana Krishna",
+    "role": "Sports Secretary - Girls",
+    "department": "Core",
+    "council": "core",
+    "group": "suc",
+    "photo": "/team/rachana.webp"
+  },
+  {
     "id": 2,
     "name": "Gavathri Krishna Vuyyuru",
     "role": "Election Commission",
@@ -80,7 +98,7 @@ export const allMembers: TeamMember[] = [
     "role": "CoSSAcN",
     "department": "DoTA",
     "council": "cossacn",
-    "photo": "/cossacns/5.webp"
+    "photo": "/team/saiteja_new.webp"
   },
   {
     "id": 6,
