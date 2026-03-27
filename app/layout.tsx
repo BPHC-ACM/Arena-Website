@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://arena-bitsh.com'),
   title: "Arena 2026 | South India's Largest Sports Festival",
   description:
     'Official website for Arena 2026, the annual sports fest of BITS Pilani Hyderabad Campus.',
